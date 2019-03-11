@@ -1,0 +1,1152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OBDA version="1.0">
+    <dataSource databaseDriver="com.mysql.jdbc.Driver" databaseName=""
+        databasePassword="Kiketta96?"
+        databaseURL="jdbc:mysql://localhost/user?characterEncoding=latin1"
+        databaseUsername="root" name="datasource"/>
+    <prefixes>
+        <prefix name="owl:" namespace="http://www.w3.org/2002/07/owl#"/>
+        <prefix name="rdf:" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+        <prefix name="ms:" namespace="http://www.obdasystems.com/mastrostudio#"/>
+        <prefix name="xsd:" namespace="http://www.w3.org/2001/XMLSchema#"/>
+        <prefix name=":" namespace="http://www.datiopen.istat.it#"/>
+        <prefix name="xml:" namespace="http://www.w3.org/XML/1998/namespace"/>
+        <prefix name="rdfs:" namespace="http://www.w3.org/2000/01/rdf-schema#"/>
+    </prefixes>
+    <templates>
+        <template>http://www.datiopen.istat.it#territorio_comunale-{_}-{_}</template>
+        <template>http://www.datiopen.istat.it#famiglia_anagrafica-{_}-{_}-{_}</template>
+        <template>http://www.datiopen.istat.it#comune-{_}-{_}</template>
+        <template>http://www.datiopen.istat.it#provincia-{_}</template>
+        <template>http://www.datiopen.istat.it#territorio_nazionale-{_}</template>
+        <template>http://www.datiopen.istat.it#regione-{_}</template>
+        <template>http://www.datiopen.istat.it#grado_istruzione-{_}</template>
+        <template>http://www.datiopen.istat.it#relazione_parentale-{_}</template>
+        <template>http://www.datiopen.istat.it#persona-{_}</template>
+        <template>{_}</template>
+        <template>http://www.datiopen.istat.it#stato_residenza-{_}-{_}</template>
+        <template>http://www.datiopen.istat.it#nazione-{_}</template>
+    </templates>
+    <mappings>
+        <ontologyPredicateComplexMapping id="M1_maschio">
+            <concept string="http://www.datiopen.istat.it#Maschio">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(genere,'M'^^xsd:string)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M2_femmina">
+            <concept string="http://www.datiopen.istat.it#Femmina">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(genere,'F'^^xsd:string)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M3_nato_in_nazione">
+            <role string="http://www.datiopen.istat.it#nato_in">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#territorio_nazionale-{nazione_nascita}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(nazione_nascita)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M7_descrizione_territorio_nazionale">
+            <attribute string="http://www.datiopen.istat.it#descrizione_territorio">
+                <domainTemplate>http://www.datiopen.istat.it#territorio_nazionale-{cod_nazione}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(descrizione)</viewAtom>
+                <viewAtom>nazione_view(cod_nazione,descrizione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M9_descrizione_territorio_comunale">
+            <attribute string="http://www.datiopen.istat.it#descrizione_territorio">
+                <domainTemplate>http://www.datiopen.istat.it#territorio_comunale-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(descrizione)</viewAtom>
+                <viewAtom>comune_view(cod_com,descrizione,cod_prov)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M14_descrizione_nazione">
+            <attribute string="http://www.datiopen.istat.it#descrizione_nazione">
+                <domainTemplate>http://www.datiopen.istat.it#nazione-{cod_nazione}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(descrizione)</viewAtom>
+                <viewAtom>nazione_view(cod_nazione,descrizione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M16_descrizione_cittadinanza">
+            <attribute string="http://www.datiopen.istat.it#descrizione_cittadinanza">
+                <domainTemplate>http://www.datiopen.istat.it#nazione-{cod_nazione}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(descrizione)</viewAtom>
+                <viewAtom>nazione_view(cod_nazione,descrizione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M20_descrizione_genere">
+            <attribute string="http://www.datiopen.istat.it#descrizione_genere">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(descrizione)</viewAtom>
+                <viewAtom>genere_view(genere,descrizione)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M21_persona_in_vita">
+            <concept string="http://www.datiopen.istat.it#Persona_in_vita">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NULL(data_morte)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M22_data_decesso">
+            <attribute string="http://www.datiopen.istat.it#data_decesso">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>data_morte</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(data_morte)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M23_persone_nata_morta">
+            <concept string="http://www.datiopen.istat.it#Persona_nata_morta">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(data_nascita,data_morte)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M24_eta">
+            <attribute string="http://www.datiopen.istat.it#eta">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>eta</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(eta)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M25_eta_al_momento_del_decesso">
+            <attribute string="http://www.datiopen.istat.it#eta_al_momento_del_decesso">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>eta_decesso</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(eta_decesso)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M26_persona_minorenne">
+            <concept string="http://www.datiopen.istat.it#Persona_minorenne">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NULL(eta_decesso)</viewAtom>
+                <viewAtom>LESS_THAN(eta,'18'^^xsd:int)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M27_persona_maggiorenne">
+            <concept string="http://www.datiopen.istat.it#Persona_maggiorenne">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>GREATER_EQUAL_THAN(eta,'18'^^xsd:integer)</viewAtom>
+                <viewAtom>IS_NULL(eta_decesso)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M28_persona_ultracentenaria">
+            <concept string="http://www.datiopen.istat.it#Persona_ultracentenaria">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>GREATER_EQUAL_THAN(eta,'100'^^xsd:int)</viewAtom>
+                <viewAtom>IS_NULL(eta_decesso)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M29_persone_residenti">
+            <concept string="http://www.datiopen.istat.it#Residente">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(cod_com_residenza_attuale)</viewAtom>
+                <viewAtom>IS_NOT_NULL(cod_prov_res_attuale)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M30_persone_non_residenti">
+            <concept string="http://www.datiopen.istat.it#Non_residente">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NULL(cod_com_residenza_attuale)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M30bis_persone_non_residenti">
+            <concept string="http://www.datiopen.istat.it#Non_residente">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NULL(cod_prov_res_attuale)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M32_coniuge_intestatario">
+            <concept string="http://www.datiopen.istat.it#Coniuge_o_convivente_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'02'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M34_figlio_intestatario_e_coniuge_convivente">
+            <concept string="http://www.datiopen.istat.it#Figlio_intestatario_e_del_coniuge_convivente">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'03'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M36_genitore_o_coniuge_convivente_del_genitore_di_intestatario">
+            <concept string="http://www.datiopen.istat.it#Genitore_o_coniuge_convivente_del_genitore_di_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'04'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M37_suocero_dello_intestatario">
+            <concept string="http://www.datiopen.istat.it#Suocero_a_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'05'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M38_fratello_sorella_dello_intestatario">
+            <concept string="http://www.datiopen.istat.it#Fratello_sorella_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'06'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M40_cognato_cognata_dello_intestatario">
+            <concept string="http://www.datiopen.istat.it#Cognato_a_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'07'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M41_genero_o_nuora_o_coniuge_o_convivente_del_figlio_a_dello_intestatario">
+            <concept string="http://www.datiopen.istat.it#Genero_nuora_coniuge_convivente_del_figlio_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'08'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M42_nipote_dello_intestatario">
+            <concept string="http://www.datiopen.istat.it#Nipote_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'09'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M44_nonno_dello_intestatario">
+            <concept string="http://www.datiopen.istat.it#Nonno_a_dello_intestatario">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'10'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M45_altro_legame_con_lo_intestatario">
+            <concept string="http://www.datiopen.istat.it#Altro_legame_con_lo_intestatario_non_altrove_specificato">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'11'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M46_ignoto">
+            <concept string="http://www.datiopen.istat.it#Ignoto">
+                <template>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'12'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M48_descrizione_relazione_parentale">
+            <attribute string="http://www.datiopen.istat.it#descrizione_relazione_parentale">
+                <domainTemplate>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,codice_rel)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+                <viewAtom>tipi_relazione_view(codice_rel,descrizione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M53_famiglia_unipersona">
+            <concept string="http://www.datiopen.istat.it#Famiglia_unipersona">
+                <template>http://www.datiopen.istat.it#famiglia_anagrafica-{cod_famiglia}-{cod_com}-{cod_prov}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(numero_componenti,'1'^^xsd:int)</viewAtom>
+                <viewAtom>famiglia_anagrafica_view(cod_famiglia,numero_componenti,cod_intestatario,cod_com,cod_prov)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M58_ha_stato_residenza">
+            <role string="http://www.datiopen.istat.it#ha_stato_residenza">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{id_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#stato_residenza-{id_individuo}-{data_inizio_val}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(data_fine_val)</viewAtom>
+                <viewAtom>stato_residenza_view(id_storico_residenza,id_individuo,cod_com,data_inizio_val,data_fine_val,cod_prov)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M60_ha_residenza_attuale">
+            <role string="http://www.datiopen.istat.it#ha_residenza_attuale">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#comune-{cod_com_residenza_attuale}-{cod_prov_res_attuale}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(cod_com_residenza_attuale)</viewAtom>
+                <viewAtom>IS_NOT_NULL(cod_prov_res_attuale)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M61_appartiene_a">
+            <role string="http://www.datiopen.istat.it#appartiene_a">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#famiglia_anagrafica-{cod_famiglia}-{cod_com_residenza_attuale}-{cod_prov_res_attuale}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(cod_famiglia)</viewAtom>
+                <viewAtom>IS_NOT_NULL(cod_com_residenza_attuale)</viewAtom>
+                <viewAtom>IS_NOT_NULL(cod_prov_res_attuale)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M62_apolide">
+            <concept string="http://www.datiopen.istat.it#Apolide">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(apolide,'1'^^xsd:string)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M63_cittadino_italiano">
+            <concept string="http://www.datiopen.istat.it#Cittadino_italiano">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(cod_nazione,'100'^^xsd:string)</viewAtom>
+                <viewAtom>IS_NULL(data_fine_val)</viewAtom>
+                <viewAtom>cittadinanza_view(cod_individuo,cod_nazione,data_inizio_val,data_fine_val)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M65_ha_cittadinanza">
+            <role string="http://www.datiopen.istat.it#ha_cittadinanza">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#nazione-{cod_nazione}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NULL(data_fine_val)</viewAtom>
+                <viewAtom>cittadinanza_view(cod_individuo,cod_nazione,data_inizio_val,data_fine_val)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M68_ha_grado_di_istruzione">
+            <role string="http://www.datiopen.istat.it#ha_grado_di_istruzione">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#grado_istruzione-{cod_grado_istruzione}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(cod_grado_istruzione)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M71_fratelli_di_intestatario">
+            <role string="http://www.datiopen.istat.it#fratello_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'06'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M72_fratelli_perche_fratelli_di_intestatario">
+            <role string="http://www.datiopen.istat.it#fratello_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{parente1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{parente2}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'06'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_dedotta(parente1,parente2,tipo_relazione,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M73_fratelli_perche_figli_di_convivente_di_intestatario">
+            <role string="http://www.datiopen.istat.it#fratello_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{parente1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{parente2}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'03'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_dedotta(parente1,parente2,tipo_relazione,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M75_coniuge_di_intestatario">
+            <role string="http://www.datiopen.istat.it#coniuge_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'02'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M76_nipote_di_nonno">
+            <role string="http://www.datiopen.istat.it#nipote_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'09'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M77_nipote_di_zio">
+            <role string="http://www.datiopen.istat.it#nipote_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'09'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M78_nonno_di">
+            <role string="http://www.datiopen.istat.it#nonno_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'10'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M79_figlio_di_intestatario">
+            <role string="http://www.datiopen.istat.it#figlio_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'03'^^xsd:int)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M80_figlio_del_convivente_di_intestatario">
+            <role string="http://www.datiopen.istat.it#figlio_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{parente1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{parente2}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione2,'02'^^xsd:string)</viewAtom>
+                <viewAtom>EQUALS(tipo_relazione1,'03'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_dedotta(parente1,parente2,tipo_relazione1,tipo_relazione2)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M81_genitore_di_intestatario">
+            <role string="http://www.datiopen.istat.it#genitore_di">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#persona-{cod_intestatario}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>EQUALS(tipo_relazione,'04'^^xsd:string)</viewAtom>
+                <viewAtom>relazione_parentale_view(cod_individuo1,cod_intestatario,tipo_relazione)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M82_persona_over_sessantacinque">
+            <concept string="http://www.datiopen.istat.it#Persona_over_sessantacinque">
+                <template>http://www.datiopen.istat.it#persona-{cod_individuo}</template>
+            </concept>
+            <viewAtomsConjunction>
+                <viewAtom>GREATER_EQUAL_THAN(eta,'65'^^xsd:int)</viewAtom>
+                <viewAtom>IS_NULL(eta_decesso)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M83_nato_in_comune">
+            <role string="http://www.datiopen.istat.it#nato_in">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#territorio_comunale-{comune_nascita}-{cod_prov_nascita}</rangeTemplate>
+            </role>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(comune_nascita)</viewAtom>
+                <viewAtom>IS_NOT_NULL(cod_prov_nascita)</viewAtom>
+                <viewAtom>persona_view(cod_individuo,data_nascita,data_morte,cod_famiglia,cod_grado_istruzione,comune_nascita,nazione_nascita,genere,genere_nascita,intestatario_foglio_famiglia,cod_com_residenza_attuale,data_inizio_val_res_attuale,apolide,eta,eta_decesso,cod_prov_nascita,cod_prov_res_attuale)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateComplexMapping id="M95_descrizione_comune">
+            <attribute string="http://www.datiopen.istat.it#descrizione_comune">
+                <domainTemplate>http://www.datiopen.istat.it#comune-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <viewAtomsConjunction>
+                <viewAtom>IS_NOT_NULL(descrizione)</viewAtom>
+                <viewAtom>comune_view(cod_com,descrizione,cod_prov)</viewAtom>
+            </viewAtomsConjunction>
+        </ontologyPredicateComplexMapping>
+        <ontologyPredicateMapping id="M4_territorio_nazionale">
+            <concept string="http://www.datiopen.istat.it#Territorio_nazionale">
+                <template>http://www.datiopen.istat.it#territorio_nazionale-{cod_nazione}</template>
+            </concept>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M5_codice_territorio_nazionale">
+            <attribute string="http://www.datiopen.istat.it#codice_territorio">
+                <domainTemplate>http://www.datiopen.istat.it#territorio_nazionale-{cod_nazione}</domainTemplate>
+                <rangeVariable>cod_nazione</rangeVariable>
+            </attribute>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M6_territorio_comunale">
+            <concept string="http://www.datiopen.istat.it#Territorio_comunale">
+                <template>http://www.datiopen.istat.it#territorio_comunale-{cod_com}-{cod_prov}</template>
+            </concept>
+            <HEAD string="comune_view(cod_com, descrizione, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M8_codice_territorio_comunale">
+            <attribute string="http://www.datiopen.istat.it#codice_territorio">
+                <domainTemplate>http://www.datiopen.istat.it#territorio_comunale-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeVariable>cod_com</rangeVariable>
+            </attribute>
+            <HEAD string="comune_view(cod_com, descrizione, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M10_amministrato_da_nazione">
+            <role string="http://www.datiopen.istat.it#amministrato_da">
+                <domainTemplate>http://www.datiopen.istat.it#territorio_nazionale-{cod_nazione}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#nazione-{cod_nazione}</rangeTemplate>
+            </role>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M11_amministrato_da_comune">
+            <role string="http://www.datiopen.istat.it#amministrato_da">
+                <domainTemplate>http://www.datiopen.istat.it#territorio_comunale-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#comune-{cod_com}-{cod_prov}</rangeTemplate>
+            </role>
+            <HEAD string="comune_view(cod_com, descrizione, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M12_nazione">
+            <concept string="http://www.datiopen.istat.it#Nazione">
+                <template>http://www.datiopen.istat.it#nazione-{cod_nazione}</template>
+            </concept>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M13_codice_nazione">
+            <attribute string="http://www.datiopen.istat.it#codice_nazione">
+                <domainTemplate>http://www.datiopen.istat.it#nazione-{cod_nazione}</domainTemplate>
+                <rangeVariable>cod_nazione</rangeVariable>
+            </attribute>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M15_codice_cittadinanza">
+            <attribute string="http://www.datiopen.istat.it#codice_cittadinanza">
+                <domainTemplate>http://www.datiopen.istat.it#nazione-{cod_nazione}</domainTemplate>
+                <rangeVariable>cod_nazione</rangeVariable>
+            </attribute>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M17_codice_individuo">
+            <attribute string="http://www.datiopen.istat.it#codice_individuo">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>cod_individuo</rangeVariable>
+            </attribute>
+            <HEAD string="persona_view(cod_individuo, data_nascita, data_morte, cod_famiglia, cod_grado_istruzione, comune_nascita, nazione_nascita, genere, genere_nascita, intestatario_foglio_famiglia, cod_com_residenza_attuale, data_inizio_val_res_attuale, apolide, eta, eta_decesso, cod_prov_nascita, cod_prov_res_attuale)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M18_data_di_nascita">
+            <attribute string="http://www.datiopen.istat.it#data_nascita">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>data_nascita</rangeVariable>
+            </attribute>
+            <HEAD string="persona_view(cod_individuo, data_nascita, data_morte, cod_famiglia, cod_grado_istruzione, comune_nascita, nazione_nascita, genere, genere_nascita, intestatario_foglio_famiglia, cod_com_residenza_attuale, data_inizio_val_res_attuale, apolide, eta, eta_decesso, cod_prov_nascita, cod_prov_res_attuale)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M19_codice_genere">
+            <attribute string="http://www.datiopen.istat.it#codice_genere">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo}</domainTemplate>
+                <rangeVariable>genere</rangeVariable>
+            </attribute>
+            <HEAD string="persona_view(cod_individuo, data_nascita, data_morte, cod_famiglia, cod_grado_istruzione, comune_nascita, nazione_nascita, genere, genere_nascita, intestatario_foglio_famiglia, cod_com_residenza_attuale, data_inizio_val_res_attuale, apolide, eta, eta_decesso, cod_prov_nascita, cod_prov_res_attuale)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M31_intestario_foglio_famiglia">
+            <concept string="http://www.datiopen.istat.it#Intestatario_foglio_famiglia">
+                <template>http://www.datiopen.istat.it#persona-{cod_intestario}</template>
+            </concept>
+            <HEAD string="famiglia_anagrafica_view(cod_famiglia, numero_componenti, cod_intestario, cod_com, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M47_codice_relazione_parentale">
+            <attribute string="http://www.datiopen.istat.it#codice_relazione_parentale">
+                <domainTemplate>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</domainTemplate>
+                <rangeVariable>tipo_relazione</rangeVariable>
+            </attribute>
+            <HEAD string="relazione_parentale_view(cod_individuo1, cod_intestatario, tipo_relazione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M49_ha_relazione_parentale">
+            <role string="http://www.datiopen.istat.it#ha_relazione_parentale">
+                <domainTemplate>http://www.datiopen.istat.it#persona-{cod_individuo1}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo1}</rangeTemplate>
+            </role>
+            <HEAD string="relazione_parentale_view(cod_individuo1, cod_intestatario, tipo_relazione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M50_famiglia_anagrafica">
+            <concept string="http://www.datiopen.istat.it#Famiglia_anagrafica">
+                <template>http://www.datiopen.istat.it#famiglia_anagrafica-{cod_famiglia}-{cod_com}-{cod_prov}</template>
+            </concept>
+            <HEAD string="famiglia_anagrafica_view(cod_famiglia, numero_componenti, cod_intestario, cod_com, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M51_codice_famiglia">
+            <attribute string="http://www.datiopen.istat.it#codice_famiglia">
+                <domainTemplate>http://www.datiopen.istat.it#famiglia_anagrafica-{cod_famiglia}-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeVariable>cod_famiglia</rangeVariable>
+            </attribute>
+            <HEAD string="famiglia_anagrafica_view(cod_famiglia, numero_componenti, cod_intestario, cod_com, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M52_numero_componenti">
+            <attribute string="http://www.datiopen.istat.it#numero_componenti">
+                <domainTemplate>http://www.datiopen.istat.it#famiglia_anagrafica-{cod_famiglia}-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeVariable>numero_componenti</rangeVariable>
+            </attribute>
+            <HEAD string="famiglia_anagrafica_view(cod_famiglia, numero_componenti, cod_intestario, cod_com, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M54_in_famiglia">
+            <role string="http://www.datiopen.istat.it#in_famiglia">
+                <domainTemplate>http://www.datiopen.istat.it#relazione_parentale-{cod_individuo}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#famiglia_anagrafica-{cod_famiglia}-{cod_com_residenza_attuale}-{cod_prov_res_attuale}</rangeTemplate>
+            </role>
+            <HEAD string="persona_view(cod_individuo, data_nascita, data_morte, cod_famiglia, cod_grado_istruzione, comune_nascita, nazione_nascita, genere, genere_nascita, intestatario_foglio_famiglia, cod_com_residenza_attuale, data_inizio_val_res_attuale, apolide, eta, eta_decesso, cod_prov_nascita, cod_prov_res_attuale)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M55_stato_residenza">
+            <concept string="http://www.datiopen.istat.it#Stato_residenza">
+                <template>http://www.datiopen.istat.it#stato_residenza-{id_individuo}-{data_inizio_val}</template>
+            </concept>
+            <HEAD string="stato_residenza_view(id_storico_residenza, id_individuo, cod_com, data_inizio_val, data_fine_val, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M56_data_inizio_validita_stato_res">
+            <attribute string="http://www.datiopen.istat.it#data_inizio_validita">
+                <domainTemplate>http://www.datiopen.istat.it#stato_residenza-{id_individuo}-{data_inizio_val}</domainTemplate>
+                <rangeVariable>data_inizio_val</rangeVariable>
+            </attribute>
+            <HEAD string="stato_residenza_view(id_storico_residenza, id_individuo, cod_com, data_inizio_val, data_fine_val, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M57_data_fine_validita_stato_res">
+            <attribute string="http://www.datiopen.istat.it#data_fine_validita">
+                <domainTemplate>http://www.datiopen.istat.it#stato_residenza-{id_individuo}-{data_inizio_val}</domainTemplate>
+                <rangeVariable>data_fine_val</rangeVariable>
+            </attribute>
+            <HEAD string="stato_residenza_view(id_storico_residenza, id_individuo, cod_com, data_inizio_val, data_fine_val, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M59_in_comune">
+            <role string="http://www.datiopen.istat.it#in_comune">
+                <domainTemplate>http://www.datiopen.istat.it#stato_residenza-{id_individuo}-{data_inizio_val}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#comune-{cod_com}-{cod_prov}</rangeTemplate>
+            </role>
+            <HEAD string="stato_residenza_view(id_storico_residenza, id_individuo, cod_com, data_inizio_val, data_fine_val, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M64_cittadino_straniero">
+            <concept string="http://www.datiopen.istat.it#Cittadino_straniero">
+                <template>http://www.datiopen.istat.it#persona-{id_individuo}</template>
+            </concept>
+            <HEAD string="cittadino_straniero_view(id_individuo, cod_nazione, data_inizio_val, data_fine_val)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M66_Famiglia_con_solo_componenti_stranieri">
+            <concept string="http://www.datiopen.istat.it#Famiglia_con_solo_componenti_stranieri">
+                <template>http://www.datiopen.istat.it#famiglia_anagrafica-{COD_FAMIGLIA}-{COD_COMUNE}-{COD_PROV}</template>
+            </concept>
+            <HEAD string="famiglia_solo_componenti_stranieri(COD_FAMIGLIA, COD_COMUNE, COD_PROV)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M67_Famiglia_con_solo_componenti_italiani">
+            <concept string="http://www.datiopen.istat.it#Famiglia_con_solo_componenti_italiani">
+                <template>http://www.datiopen.istat.it#famiglia_anagrafica-{COD_FAMIGLIA}-{COD_COMUNE}-{COD_PROV}</template>
+            </concept>
+            <HEAD string="famiglia_solo_componenti_italiani(COD_FAMIGLIA, COD_COMUNE, COD_PROV)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M69_codice_grado_di_istruzione">
+            <attribute string="http://www.datiopen.istat.it#codice_grado_di_istruzione">
+                <domainTemplate>http://www.datiopen.istat.it#grado_istruzione-{codice_grado_istruzione}</domainTemplate>
+                <rangeVariable>codice_grado_istruzione</rangeVariable>
+            </attribute>
+            <HEAD string="grado_istruzione_view(codice_grado_istruzione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M70_descrizione_grado_di_istruzione">
+            <attribute string="http://www.datiopen.istat.it#descrizione_grado_di_istruzione">
+                <domainTemplate>http://www.datiopen.istat.it#grado_istruzione-{codice_grado_istruzione}</domainTemplate>
+                <rangeVariable>descrizione</rangeVariable>
+            </attribute>
+            <HEAD string="grado_istruzione_view(codice_grado_istruzione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M84_codice_provincia">
+            <attribute string="http://www.datiopen.istat.it#codice_provincia">
+                <domainTemplate>http://www.datiopen.istat.it#provincia-{cod_provincia}</domainTemplate>
+                <rangeVariable>cod_provincia</rangeVariable>
+            </attribute>
+            <HEAD string="provincia_view(cod_provincia, descrizione, cod_regione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M85_codice_regione">
+            <attribute string="http://www.datiopen.istat.it#codice_regione">
+                <domainTemplate>http://www.datiopen.istat.it#regione-{cod_regione}</domainTemplate>
+                <rangeVariable>cod_regione</rangeVariable>
+            </attribute>
+            <HEAD string="regione_view(cod_regione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M90_in_regione">
+            <role string="http://www.datiopen.istat.it#in_regione">
+                <domainTemplate>http://www.datiopen.istat.it#provincia-{cod_provincia}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#regione-{cod_regione}</rangeTemplate>
+            </role>
+            <HEAD string="provincia_view(cod_provincia, desc, cod_regione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M91_in_provincia">
+            <role string="http://www.datiopen.istat.it#in_provincia">
+                <domainTemplate>http://www.datiopen.istat.it#comune-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeTemplate>http://www.datiopen.istat.it#provincia-{cod_prov}</rangeTemplate>
+            </role>
+            <HEAD string="comune_view(cod_com, descrizione, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M94_codice_comune">
+            <attribute string="http://www.datiopen.istat.it#codice_comune">
+                <domainTemplate>http://www.datiopen.istat.it#comune-{cod_com}-{cod_prov}</domainTemplate>
+                <rangeVariable>cod_com</rangeVariable>
+            </attribute>
+            <HEAD string="comune_view(cod_com, descrizione, cod_prov)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M97_regione">
+            <concept string="http://www.datiopen.istat.it#Regione">
+                <template>http://www.datiopen.istat.it#regione-{cod_regione}</template>
+            </concept>
+            <HEAD string="regione_view(cod_regione, descrizione)"/>
+        </ontologyPredicateMapping>
+        <ontologyPredicateMapping id="M98_provincia">
+            <concept string="http://www.datiopen.istat.it#Provincia">
+                <template>http://www.datiopen.istat.it#provincia-{cod_provincia}</template>
+            </concept>
+            <HEAD string="provincia_view(cod_provincia, descrizione, cod_regione)"/>
+        </ontologyPredicateMapping>
+        <primitiveView>
+            <HEAD string="cittadinanza_view(id_individuo, cod_nazione, data_inizio_val, data_fine_val)"/>
+            <SQLQuery>SELECT
+  c.ID_INDIVIDUO AS id_individuo,
+  c.COD_NAZIONE AS cod_nazione,
+  c.DATA_INIZIO_VAL AS data_inizio_val,
+  c.DATA_FINE_VAL AS data_fine_val
+FROM
+  CITTADINANZE c</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="cittadino_straniero_view(id_individuo, cod_nazione, data_inizio_val, data_fine_val)"/>
+            <SQLQuery>SELECT  c.ID_INDIVIDUO as id_individuo,
+        c.COD_NAZIONE as cod_nazione,
+        c.DATA_INIZIO_VAL as data_inizio_val,
+        c.DATA_FINE_VAL as data_fine_val
+FROM CITTADINANZE c
+WHERE c.COD_NAZIONE &lt;&gt; 12545
+AND c.DATA_FINE_VAL IS NULL
+AND NOT EXISTS (SELECT '1' FROM CITTADINANZE c2
+            WHERE   c.ID_INDIVIDUO = c2.ID_INDIVIDUO
+            AND     c2.COD_NAZIONE = 12545)</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="comune_view(cod_com, descrizione, cod_prov)"/>
+            <SQLQuery>SELECT c.cod_comune AS cod_com,
+ c.descrizione AS descrizione,
+ c.COD_PROVINCIA AS cod_prov
+FROM comune c</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="famiglia_anagrafica_view(cod_famiglia, numero_componenti, cod_intestario, cod_com, cod_prov)"/>
+            <SQLQuery>SELECT fa.cod_famiglia as cod_famiglia,
+       fa.num_componenti as numero_componenti,
+       fa.cod_intestatario_ff as cod_intestario,
+       fa.cod_com_residenza as cod_com,
+       fa.cod_prov_residenza as cod_prov
+FROM famiglia_anagrafica fa</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="famiglia_solo_componenti_italiani(COD_FAMIGLIA, COD_COMUNE, COD_PROV)"/>
+            <SQLQuery>SELECT
+  f.cod_famiglia               AS COD_FAMIGLIA,
+  f.cod_com_residenza  AS COD_COMUNE,
+  f.cod_prov_residenza AS COD_PROV
+FROM
+  FAMIGLIA_ANAGRAFICA f
+WHERE
+  f.num_componenti =
+  (
+    SELECT
+      COUNT(distinct P2.cod_individuo)
+    FROM
+      persona P2,
+      cittadinanze C
+    WHERE
+      f.cod_famiglia         = P2.cod_famiglia
+    AND f.cod_com_residenza  = P2.cod_com_residenza_attuale
+    AND f.cod_prov_residenza = P2.cod_prov_residenza_attuale
+    AND P2.cod_individuo     = C.id_individuo
+    AND C.cod_nazione        = '100'
+    AND C.data_fine_val     IS NULL
+  )</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="famiglia_solo_componenti_stranieri(COD_FAMIGLIA, COD_COMUNE, COD_PROV)"/>
+            <SQLQuery>SELECT
+  f.cod_famiglia       AS COD_FAMIGLIA,
+  f.cod_com_residenza  AS COD_COMUNE,
+  f.cod_prov_residenza AS COD_PROV
+FROM
+  FAMIGLIA_ANAGRAFICA f
+WHERE
+  f.num_componenti =
+  (
+    SELECT
+      COUNT(distinct P2.cod_individuo)
+    FROM
+      persona P2,
+      cittadinanze C
+    WHERE
+      f.cod_famiglia          = P2.cod_famiglia
+    AND f.cod_com_residenza   = P2.cod_com_residenza_attuale
+    AND f.cod_prov_residenza  = P2.cod_prov_residenza_attuale
+    AND P2.cod_individuo      = C.id_individuo
+    AND C.cod_nazione        &lt;&gt; '100'
+    AND C.data_fine_val      IS NULL
+    AND P2.cod_individuo NOT IN
+      (
+        SELECT
+          P3.cod_individuo
+        FROM
+          persona P3,
+          cittadinanze C3
+        WHERE
+          P3.cod_individuo    = C3.id_individuo
+        AND C3.cod_nazione    = '100'
+        AND C3.data_fine_val IS NULL
+      )
+  )</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="genere_view(codice, descrizione)"/>
+            <SQLQuery>SELECT g.cod_genere AS codice,
+	  g.descrizione AS descrizione
+FROM genere g 	</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="grado_istruzione_view(codice_grado_istruzione, descrizione)"/>
+            <SQLQuery>SELECT 	gi.cod_grado_istr AS codice_grado_istruzione,
+		gi.descrizione AS descrizione
+FROM 	grado_istruzione gi</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="nazione_view(cod_nazione, descrizione)"/>
+            <SQLQuery>SELECT 	n.cod_nazione AS cod_nazione,
+		n.descrizione_nazione AS descrizione
+FROM nazione n</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="persona_view(cod_individuo, data_nascita, data_morte, cod_famiglia, cod_grado_istruzione, comune_nascita, nazione_nascita, genere, genere_nascita, intestatario_foglio_famiglia, cod_com_residenza_attuale, data_inizio_val_res_attuale, apolide, eta, eta_decesso, cod_prov_nascita, cod_prov_res_attuale)"/>
+            <SQLQuery>SELECT
+  p.cod_individuo AS cod_individuo,
+  p.DATA_NASCITA AS data_nascita,
+  p.DATA_MORTE AS data_morte,
+  p.cod_famiglia AS cod_famiglia,
+  p.cod_grado_istruzione AS cod_grado_istruzione,
+  p.comune_nascita AS comune_nascita,
+  p.nazione_nascita AS nazione_nascita,
+  p.genere AS genere,
+  p.genere_nascita AS genere_nascita,
+  p.intestatario_foglio_famiglia AS intestatario_foglio_famiglia,
+  p.cod_com_residenza_attuale AS cod_com_residenza_attuale,
+  p.DATA_INIZIO_VAL_RES_ATTUALE AS data_inizio_val_res_attuale,
+  p.apolide AS apolide,
+  YEAR(CURDATE()) - YEAR(p.DATA_NASCITA) as eta,
+  YEAR(p.DATA_MORTE) - YEAR(p.DATA_NASCITA) as eta_decesso,
+  p.provincia_nascita as cod_prov_nascita,
+  p.COD_PROV_RESIDENZA_ATTUALE as cod_prov_res_attuale
+FROM
+  PERSONA p</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="provincia_view(cod_provincia, descrizione, cod_regione)"/>
+            <SQLQuery>SELECT
+  p.COD_PROVINCIA AS cod_provincia,
+  p.DESCRIZIONE AS descrizione,
+  p.COD_REGIONE AS cod_regione
+FROM
+  PROVINCIA p</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="regione_view(cod_regione, descrizione)"/>
+            <SQLQuery>SELECT
+  r.COD_REGIONE AS cod_regione,
+  r.DESCRIZIONE AS descrizione
+FROM REGIONE r</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="relazione_parentale_dedotta(parente1, parente2, tipo_relazione1, tipo_relazione2)"/>
+            <SQLQuery>SELECT 	p1.ID_INDIVIDUO AS parente1,
+		p2.ID_INDIVIDUO AS parente2,
+          p1.COD_TIPO_REL AS tipo_relazione1,
+          p2.COD_TIPO_REL AS tipo_relazione2
+FROM 	relazione_parentale p1,
+		relazione_parentale p2
+WHERE     p1.ID_INTESTATARIO_FAMIGLIA = p2.ID_INTESTATARIO_FAMIGLIA
+AND		p1.ID_INDIVIDUO != p2.ID_INDIVIDUO  </SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="relazione_parentale_view(cod_individuo1, cod_intestatario, tipo_relazione)"/>
+            <SQLQuery>SELECT rp.ID_INDIVIDUO AS cod_individuo1,
+	   rp.ID_INTESTATARIO_FAMIGLIA AS cod_intestatario,
+       rp.COD_TIPO_REL AS tipo_relazione
+FROM relazione_parentale rp</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="stato_residenza_view(id_storico_residenza, id_individuo, cod_com, data_inizio_val, data_fine_val, cod_prov)"/>
+            <SQLQuery>SELECT sr.id_storico_residenza  AS id_storico_residenza,
+    sr.id_individuo AS id_individuo,
+    sr.cod_com as cod_com,
+    sr.data_inizio_val as data_inizio_val,
+    sr.data_fine_val as data_fine_val,
+    sr.cod_prov as cod_prov
+FROM storico_residenza sr</SQLQuery>
+        </primitiveView>
+        <primitiveView>
+            <HEAD string="tipi_relazione_view(codice_rel, descrizione)"/>
+            <SQLQuery>SELECT tr.cod_tipo_rel AS codice_rel,
+	   tr.descrizione AS descrizione
+FROM tipo_relazione tr</SQLQuery>
+        </primitiveView>
+    </mappings>
+    <blocks/>
+    <constraints>
+        <deny>
+            <viewAtom>famiglia_solo_componenti_italiani(cod_famiglia, cod_com, cod_prov)</viewAtom>
+            <viewAtom>famiglia_solo_componenti_stranieri(cod_famiglia, cod_com, cod_prov)</viewAtom>
+        </deny>
+        <deny>
+            <viewAtom>regione_view(cod, descrizione2)</viewAtom>
+            <viewAtom>nazione_view(cod, descrizione1)</viewAtom>
+        </deny>
+        <inclusion>
+            <left arg="persona_view[7]"/>
+            <right arg="nazione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="stato_residenza_view[2]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[11, 17]"/>
+            <right arg="comune_view[1, 3]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_dedotta[2]"/>
+            <right arg="relazione_parentale_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[8]"/>
+            <right arg="genere_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[16]"/>
+            <right arg="provincia_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="provincia_view[3]"/>
+            <right arg="regione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="cittadino_straniero_view[1, 2, 3, 4]"/>
+            <right arg="cittadinanza_view[1, 2, 3, 4]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="comune_view[3]"/>
+            <right arg="provincia_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_view[2]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="famiglia_anagrafica_view[4, 5]"/>
+            <right arg="comune_view[1, 3]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[9]"/>
+            <right arg="genere_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_view[3]"/>
+            <right arg="tipi_relazione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_dedotta[3]"/>
+            <right arg="tipi_relazione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="famiglia_anagrafica_view[3]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="cittadinanza_view[1]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="stato_residenza_view[6]"/>
+            <right arg="provincia_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_dedotta[4]"/>
+            <right arg="tipi_relazione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="cittadino_straniero_view[2]"/>
+            <right arg="nazione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[4, 11, 17]"/>
+            <right arg="famiglia_anagrafica_view[1, 4, 5]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_dedotta[2]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="stato_residenza_view[3, 6]"/>
+            <right arg="comune_view[1, 3]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="famiglia_solo_componenti_stranieri[1]"/>
+            <right arg="famiglia_anagrafica_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="cittadino_straniero_view[1]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_dedotta[1]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="cittadinanza_view[2]"/>
+            <right arg="nazione_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[17]"/>
+            <right arg="provincia_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="famiglia_solo_componenti_italiani[1]"/>
+            <right arg="famiglia_anagrafica_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_dedotta[1]"/>
+            <right arg="relazione_parentale_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[6, 16]"/>
+            <right arg="comune_view[1, 3]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="relazione_parentale_view[1]"/>
+            <right arg="persona_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="famiglia_anagrafica_view[5]"/>
+            <right arg="provincia_view[1]"/>
+        </inclusion>
+        <inclusion>
+            <left arg="persona_view[5]"/>
+            <right arg="grado_istruzione_view[1]"/>
+        </inclusion>
+        <key>
+            <projection arg="cittadinanza_view[1, 2, 3]"/>
+        </key>
+        <key>
+            <projection arg="cittadino_straniero_view[1, 2, 3]"/>
+        </key>
+        <key>
+            <projection arg="comune_view[1, 3]"/>
+        </key>
+        <key>
+            <projection arg="famiglia_anagrafica_view[1, 4, 5]"/>
+        </key>
+        <key>
+            <projection arg="genere_view[1]"/>
+        </key>
+        <key>
+            <projection arg="grado_istruzione_view[1]"/>
+        </key>
+        <key>
+            <projection arg="nazione_view[1]"/>
+        </key>
+        <key>
+            <projection arg="persona_view[1]"/>
+        </key>
+        <key>
+            <projection arg="provincia_view[1]"/>
+        </key>
+        <key>
+            <projection arg="regione_view[1]"/>
+        </key>
+        <key>
+            <projection arg="relazione_parentale_dedotta[1, 2]"/>
+        </key>
+        <key>
+            <projection arg="relazione_parentale_view[1, 2]"/>
+        </key>
+        <key>
+            <projection arg="stato_residenza_view[2, 4]"/>
+        </key>
+        <key>
+            <projection arg="tipi_relazione_view[1]"/>
+        </key>
+    </constraints>
+</OBDA>

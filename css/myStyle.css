@@ -1,0 +1,181 @@
+.scrollbar {
+
+    height: 65vh;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+ a{
+    color: black;
+     white-space: nowrap;
+     display: block;
+ }
+            
+ a:hover {
+    color : #4CAD50;
+    text-decoration: none;
+}
+
+
+#details {
+    display: none;
+  background-color: #fefefe;
+    position: fixed;
+    z-index: 3;
+    margin: 15% 15%;
+    padding: 10px;
+  border: 1px solid #888;
+  width: 50%;
+  height: 50%;
+    overflow: auto;
+    word-wrap: normal;
+}
+
+#close{
+    z-index: 4;
+}
+
+#closeDetails {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    
+}
+
+#SelOpzione {
+    
+    width: auto;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+#connections {
+    display: none;
+}
+
+img.right-eye {
+    display: none;
+    float: right;
+    position: absolute;
+}
+
+img.right-sym {
+    display: none;
+    float: right;
+}
+
+pre {
+    float: right;
+}
+
+img {
+    width: 24px; 
+    height: 24px;
+}
+
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #3e8e60;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #3e8e60;
+  min-width: 230px;
+  overflow: auto;
+  border: 1px solid #4CAF50;
+  z-index: 2;
+}
+
+.dropdown-content a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: inherit;
+  display: block;
+}
+
+.dropdown a:hover {
+    background-color: #4CAF50;
+}
+
+.show {
+    display: block;
+}
+
+.myInput {
+  
+  background-image: url("https://img.icons8.com/windows/50/000000/search.png");
+  background-position: 10px 12px; 
+  background-size: 20px;
+  background-repeat: no-repeat;
+  width: 70%;
+  font-size: 16px; 
+  padding: 8px 40px 10px 40px; 
+  border: 1px solid #ddd; 
+  border-radius: 7px;
+  margin-bottom: 5px; 
+}
+
+#popUp {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    padding: 6px;
+    padding-top: 2px;
+    padding-bottom: 6px;
+    border: 1px solid black;
+    background-color: rgba(255,255,255,1);
+}
+
+#showLinks {
+    float: right;
+    margin-right: 50px;
+    display: none;
+}
+
+#closeFilter {
+    cursor: pointer;
+}
+
+.filter{
+    background-color: gainsboro;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.selected {
+    color: #4CAD50;
+}
+
+#canvas{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+    
+}
+
+ul.spread {
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+

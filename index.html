@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <link rel="stylesheet" href="css/bootstrap.css" />
+        <link rel="stylesheet" href="css/myStyle.css" />
+        <link rel="stylesheet" href="css/all.css" />
+        <script src="js/bootstrap.min.js" ></script>
+        <script src="js/bootstrap.bundle.min.js" ></script>
+        <script href="sql-formatter-2.3.0/src/sqlFormatter.js"></script>
+        <script href="js/canvasjs.min.js"></script>
+
+
+    </head>
+    
+    <body>
+        <canvas id="canvas"></canvas>
+        <button id='popUp' onclick="showInfo()" class="btn"><img src="https://img.icons8.com/windows/32/000000/about.png" style="width: 20px; height: 20px;" /></button>
+        
+        <div id='closeDetails' onclick="closeDetails()">
+            <div id="details">
+                    <span id='close' class='close' onclick="closeDetails()">&times;</span>
+                    <div id='detailsContent'></div>
+                    <div id='info'></div>
+            </div>
+        </div>
+        
+        <div class="container-fluyd align-middle p-3">
+            
+            <select id="selection" class="dropbtn btn" onchange="SelVisualization()">
+              <option value="1" selected="selected">Views - Mappings - Entities</option>
+              <option value="2">Views - Mappings</option>
+              <option value="3">Mappings - Entities</option>
+            </select>
+            
+           
+            <button class="dropbtn btn" onclick="clearAll()"><img src="https://img.icons8.com/windows/32/000000/clear-filters.png" /></button>
+             <ul id='filterList' class='list-unstyled' style='display: inline-block'>
+                <li id='filterView' class='filter'></li>
+                <li id='filterMapping' class='filter'></li>
+                <li id='filterEntity' class='filter'></li>
+            </ul>
+            <button id="showLinks" class="dropbtn btn" onclick="showLinks()">Remove Links</button>
+            
+            <div class="row">
+                <div id="col1" class="col-md-4 col-xs-12">
+                    <h3>Views</h3>
+                    <div class="dropdown">
+                          <button onclick="showMenu()" class="dropbtn btn">Order </button>
+                          <div class="dropdown-content">
+                                <a href="#" onclick="orderViewsAlpha()">Alphabetically</a>
+                      </div>
+                    </div>
+                    <input type="text" id="searchView" class="myInput" onkeyup="searchView()" placeholder="Search for views..">
+                    <button class="btn" style="background-color: transparent" onclick="clearInputViews()"><img src="https://img.icons8.com/windows/32/000000/cancel.png" /></button>
+                    <p></p>
+                    <ul id="lista_viste" class="list-unstyled scrollbar">
+                        
+                    </ul>
+                </div>
+                
+                <div id="col2" class="col-md-4 col-xs-12">
+                    <h3>Mappings</h3>
+                    <div class="dropdown">
+                      <button onclick="showMenu()" class="dropbtn btn">Order </button>
+                      <div class="dropdown-content">
+                        <a href="#" onclick="orderMappingAlpha()">Alphabetically</a>
+                        <a href="#" onclick="orderByViews()">By Views</a>
+                        <a href="#" onclick="orderByEntities()">By Entities</a>
+                      </div>
+                    </div>
+                    <input type="text" id="searchMapping" class="myInput" onkeyup="searchMapping()" placeholder="Search for mappings..">
+                    <button class="btn" style="background-color: transparent" onclick="clearInputMappings()"><img src="https://img.icons8.com/windows/32/000000/cancel.png" /></button>
+                    <p></p>
+                    <ul id="lista_mapping" class="list-unstyled scrollbar">
+                        
+                    </ul>
+                </div>
+                
+                <div id="col3" class="col-md-4 col-xs-12S">
+                    <h3>Entities</h3>
+                    <div class="dropdown">
+                      <button onclick="showMenu()" class="dropbtn btn">Order </button>
+                      <div class="dropdown-content">
+                        <a href="#" onclick="orderEntitiesAlpha()">Alphabetically</a>
+                        <a href="#" onclick="orderType()">By Type</a>
+                      </div>
+                    </div>
+                    <input type="text" id="searchEntity" class="myInput" onkeyup="searchEntity()" placeholder="Search for entities..">
+                    <button class="btn" style="background-color: transparent" onclick="clearInputEntities()"><img src="https://img.icons8.com/windows/32/000000/cancel.png" /></button>
+                    <p></p>
+                    <ul id="lista_entita" class="list-unstyled scrollbar">
+                
+                    </ul>
+                </div>
+                
+            </div>
+            
+            
+             <pre id="legend"> <img src="https://img.icons8.com/material-outlined/32/000000/unchecked-checkbox.png" /> : Class  <img src="https://img.icons8.com/windows/32/000000/diamonds.png" /> : Object Property  <img src="https://img.icons8.com/material-rounded/32/000000/circled.png" /> : Data Property </pre>
+            
+            
+        </div>
+        
+          
+        
+
+        
+        
+    </body>
+    
+    <script>
+                
+        var clicked = 0;
+        var selected;
+        var selected_type;
+        
+        var canvas;
+        var context;
+        
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                loadData(this);
+            }
+        };
+
+        xmlhttp.open("GET", "mappings.xml", true);
+        xmlhttp.send();
+        
+        
+        function loadData(xml) {
+            
+            //This function gets the information from the xml file, adding some details such as the icon for each element. It takes the tag name for views, mappings, attributes, roles and concepts and save some information about them. It also prepare the canvas box for the connections
+            
+            canvas = document.getElementById("canvas");
+            context = canvas.getContext("2d");
+            
+            
+            var xmlDoc;
+            xmlDoc = xml.responseXML;
+           
+            //Gets the views information from the xml file   
+            var el, i, txt, view_name, view_string;
+            txt = "";
+    
+            el = xmlDoc.getElementsByTagName("primitiveView");
+            
+            for (i=0; i< el.length ; i++) {
+                
+                view_string = el[i].firstElementChild.getAttribute("string");
+                
+                view_name = view_string.slice(0, view_string.indexOf("("));
+                
+                txt += '<li class="view_element"><a href="#" id="' + view_string + '"  class="view_link"><img src="https://img.icons8.com/windows/32/000000/visible.png" class="left-eye" />' + view_name + '<img src="https://img.icons8.com/windows/32/000000/visible.png" id="eye' + i + '" class="right-eye"></a></li>';
+
+                
+            }
+            
+            var tag;
+            tag = document.getElementById("lista_viste");
+            tag.innerHTML = txt;
+            
+            var max = 0;
+            var off;
+            var righteye = document.getElementsByClassName('right-eye');
+
+
+            for (i=0; i<righteye.length; i++) {
+                
+                righteye[i].style.display = 'inline';
+                off = getOffset(righteye[i]);
+                if (off.left > max) {
+                    max = off.left;
+                }
+            } 
+
+            for (i=0; i<righteye.length; i++){
+                righteye[i].style.left = max +'px';
+                righteye[i].style.display = 'none';
+            }
+            
+            
+            txt="";
+            var txt2 =  "";
+            var j = 0;
+            
+            //Gets the mappings and entities information from the file xml
+            el = xmlDoc.getElementsByTagName("ontologyPredicateMapping");
+            
+            getPredicateMapping(el);
+            
+            el = xmlDoc.getElementsByTagName("ontologyPredicateComplexMapping");
+            
+            getPredicateMapping(el);
+            
+            function getPredicateMapping(el, name) {
+                
+                var  role, attribute, concept, string, type;
+            
+                for (i=0; i< el.length ; i++) {
+
+                    type = el[i].firstElementChild.tagName;
+
+
+
+                    switch(type) {
+
+                        case "attribute":
+                            string = el[i].firstElementChild.getAttribute("string");
+                            
+                            attribute = searchPrefix(string)[0];
+                            
+                            if (txt.search(attribute) < 0) {
+                            
+                                txt += '<li class="entity_element attribute_element"><a href="#" id="' + string + '" class="attributes_link entity_link"> <img src="https://img.icons8.com/material-rounded/32/000000/circled.png" />' + attribute + '</a></li>';
+                            
+                            }
+                            break;
+
+                        case "role":
+                            string = el[i].firstElementChild.getAttribute("string");
+
+                            role = searchPrefix(string)[0];
+                            
+                            if (txt.search(role) < 0) {
+
+                                txt += '<li class="entity_element role_element"><a href="#" id="' + string + '" class="roles_link entity_link"><img src="https://img.icons8.com/windows/32/000000/diamonds.png" />' + role + '</a></li>';
+                            }
+                            break;
+
+                        case "concept":
+                            string = el[i].firstElementChild.getAttribute("string");
+
+                            concept = searchPrefix(string)[0];
+                            
+                            if (txt.search(concept) < 0) {
+
+                                txt += '<li class="entity_element concept_element"><a href="#" id="' + string + '" class="concepts_link entity_link"><img src="https://img.icons8.com/material-outlined/32/000000/unchecked-checkbox.png" />' + concept + '</a></li>';
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                   
+                    
+                    txt2 += '<li class="mapping_element"><a href="#" id="' + el[i].getAttribute("id") + '"  class="mapping_link"><img src="https://img.icons8.com/windows/32/000000/link.png" class="left-sym" />' + el[i].getAttribute("id") + ' <img src="https://img.icons8.com/windows/32/000000/link.png" id="link' + j + '" class="right-sym" /></a></li>';
+                    
+                    j++;
+                 
+
+                }
+                
+            var tag;
+            tag = document.getElementById("lista_entita");
+            tag.innerHTML = txt;
+            
+            var tag2;
+            tag2 = document.getElementById("lista_mapping");
+            tag2.innerHTML = txt2; 
+                        
+                 
+                
+            }
+           
+            
+            addListenerView();
+            addListenerMapping();
+            addListenerEntities();
+            
+
+        
+        }
+        
+        function showMenu() {
+            
+            //This function shows the menu button that has been clicked
+            event.target.nextElementSibling.style.display = 'block';
+            
+            document.getElementById("closeDetails").style.display = 'block';
+        }
+        
+        function closeMenu() {
+            
+            //This function closes all the menu buttons that are still displayed
+            var butt = document.getElementsByClassName("dropdown-content");
+                for(i=0; i<butt.length; i++) {
+                    
+                    butt[i].style.display = 'none';
+                    document.getElementById("closeDetails").style.display = 'none';
+                }
+        }
+        
+        function closeDetails() {
+            
+            //This function closes the details box that has been showned and allows to click on the span element (x) or on each part of the window, that is represented by the element "closeDetails"
+            if (event.target == document.getElementById("closeDetails") || event.target == document.getElementById("close")) {
+            
+                document.getElementById("closeDetails").style.display = 'none';
+                document.getElementById("details").style.display = 'none';
+
+                var butt = document.getElementsByClassName("dropdown-content");
+                
+                for(i=0; i<butt.length; i++) {
+
+                    butt[i].style.display = 'none';}
+
+            }
+            
+        }
+        
+        function clearAll() {
+            
+            //This function clears all filters
+            
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;
+            
+            document.getElementById("filterView").innerHTML = '';
+            document.getElementById("filterMapping").innerHTML = '';
+            document.getElementById("filterEntity").innerHTML = '';
+            
+            clearInputViews();
+            clearInputEntities();
+            clearInputMappings();
+            
+            deleteLines();
+            
+            
+            if (valore == '2') {
+                document.getElementById("lista_viste").classList.add("spread");
+                document.getElementById("lista_mapping").classList.add("spread");
+                drawLinesVM();
+            }
+            else if (valore == '3'){
+                document.getElementById("lista_mapping").classList.add("spread");
+                document.getElementById("lista_entita").classList.add("spread");
+                drawLinesMP();
+            }
+            
+            
+        }
+        
+           
+        function SelVisualization(){
+            
+            //This function gets the clicked option and load the new visualization, such as Views-Mappings or Mappings-Entities. It also draws the connections between elements. It is possible to reload the first visualization. In case we are in a visualization different from the first one, some elements will be shown and some hidden, such as the icons for the column of the left that will be showed on the right side of the element
+            
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;
+                
+            var j;
+            var righteye = document.getElementsByClassName("right-eye");
+            var lefteye = document.getElementsByClassName("left-eye");
+
+            var rightsym = document.getElementsByClassName("right-sym");
+            var leftsym = document.getElementsByClassName("left-sym");
+                
+            //variable to let the elements spread on the total height of the maxier list
+            var ul = document.getElementsByTagName("ul");
+            deleteLines();
+
+            switch (valore){
+                        
+                case '1':
+
+                    document.getElementById("col1").style.display = "block";
+                    document.getElementById("col2").style.display = "block";
+                    document.getElementById("col3").style.display = "block";
+                    document.getElementById("legend").style.display = "block";
+                    document.getElementById("col1").className = "col-md-4 col-xs-12";
+                    document.getElementById("col2").className = "col-md-4 col-xs-12";
+                    document.getElementById("col3").className = "col-md-4 col-xs-12";
+                    document.getElementById("lista_viste").className = "list-unstyled scrollbar";
+                    document.getElementById("lista_mapping").className = "list-unstyled scrollbar";
+                    document.getElementById("lista_entita").className = "list-unstyled scrollbar";
+                    document.getElementById("showLinks").style.display = 'none';
+
+                    for (j=0; j<righteye.length; j++) {
+
+                        righteye[j].style.display = 'none';
+                        lefteye[j].style.display = 'inline';
+                    } 
+
+                    for (j=0; j<rightsym.length; j++) {
+
+                        rightsym[j].style.display = 'none';
+                        leftsym[j].style.display = 'inline';
+                    }
+                    
+                    for (j=0; j<ul.length; j++){
+                        ul[j].classList.remove("spread");
+                    }
+
+                    addListenerView();
+                    addListenerMapping();
+                    addListenerEntities();
+                    break;
+
+
+
+                case '2':
+
+                    document.getElementById("col3").style.display = "none";
+                    document.getElementById("col1").style.display = "block";
+                    document.getElementById("col2").className = "col-md-4 col-xs-12 ml-auto mr-0";
+                    document.getElementById("col1").className = "col-md-4 col-xs-12";
+                    document.getElementById("legend").style.display = "none";
+                    document.getElementById("lista_viste").className = "list-unstyled";
+                    document.getElementById("lista_mapping").className = "list-unstyled";
+                    document.getElementById("showLinks").style.display = 'block';
+
+                
+
+                    var max = 0;
+                    var off;
+
+
+                    for (j=0; j<righteye.length; j++) {
+
+                        righteye[j].style.display = 'inline';
+                        lefteye[j].style.display = 'none';
+                        off = getOffset(righteye[j]);
+                        if (off.left > max) {
+                            max = off.left;
+                        }
+                    } 
+
+                    for (j=0; j<righteye.length; j++){
+                        righteye[j].style.left = max +'px';
+                    }
+
+                    for (j=0; j<rightsym.length; j++) {
+
+                        rightsym[j].style.display = 'none';
+                        leftsym[j].style.display = 'inline';
+                    } 
+                    var result = checkFilter();
+                    if(result[0] == null && result[1] == null){
+                        for (j=0; j<ul.length; j++){
+                            ul[j].classList.add("spread");
+                        }
+                    }
+                    drawLinesVM();
+
+                    addListenerView();
+                    addListenerMapping();
+
+                    break;
+
+                case '3':
+
+                    document.getElementById("col1").style.display = "none";
+                    document.getElementById("col2").className = "col-md-4 col-xs-12";
+                    document.getElementById("col3").className = "col-md-4 col-xs-12 ml-auto mr-0";
+                    document.getElementById("col3").style.display = "block";
+                    document.getElementById("legend").style.display = "block";
+                    document.getElementById("lista_mapping").className = "list-unstyled";
+                    document.getElementById("lista_entita").className = "list-unstyled";
+                    document.getElementById("showLinks").style.display = 'block';
+
+
+
+                    for (j=0; j<rightsym.length; j++) {
+
+                        rightsym[j].style.display = 'inline';
+                        leftsym[j].style.display = 'none';
+                    }
+
+                    var result = checkFilter();
+                    if(result[2] == null && result[1] == null){
+                    
+                        for (j=0; j<ul.length; j++){
+                            ul[j].classList.add("spread");
+                        }
+                    }
+
+
+                    drawLinesMP();
+
+                    addListenerMapping();
+                    addListenerEntities();
+
+
+                    break;
+
+                default:
+                    break;
+
+
+
+            }
+                closeMenu();
+        }
+        
+    
+        function orderViewsAlpha(){
+            
+            //This function removes all the Nodes Elemements from the views list and reorder them thanks to the function "orderList()"
+            
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value; 
+            var list = orderList(document.getElementsByClassName("view_element"));
+            
+            for(var i = 0 ; i < list.length; i++) {
+                
+                var parent = list[i].parentNode;
+                var detatchedItem = parent.removeChild(list[i]);
+
+
+            }
+            
+            for(var i = 0 ; i < list.length; i++) {
+                
+                parent.appendChild(list[i]);
+               
+            }
+            
+            //If we are in a visualization different from the first one, we need to draw the connections
+            if (valore == '2'){
+                deleteLines();
+                drawLinesVM();
+            }
+            
+            closeMenu();
+            
+        }
+        
+        function orderEntitiesAlpha(){
+            
+            //This function removes all the Nodes Elemements from the entities list and reorder them thanks to the function "orderList()"
+
+            
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;
+            
+            var list = orderList(document.getElementsByClassName("entity_element"));
+            for(var i = 0 ; i < list.length; i++) {
+                
+                var parent = list[i].parentNode;
+                var detatchedItem = parent.removeChild(list[i]);
+                //parent.appendChild(detatchedItem);
+               
+            }
+            
+            for(var i = 0 ; i < list.length; i++) {
+                
+                parent.appendChild(list[i]);
+               
+            }
+            //If we are in a visualization different from the first one, we need to draw the connections
+            if (valore == '3') {
+                deleteLines();
+                drawLinesMP();
+            }
+            closeMenu();
+        }
+        
+        function orderMappingAlpha(){
+             //This function reorders the mappings elements alphabetically
+ 
+            
+            var list = [];
+            var buffer;
+            var text = "";
+            var i, j, n, m, max;
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;
+            
+            max = 0;
+            list = document.getElementsByClassName("mapping_link");
+                        
+            for (i=0; i<list.length; i++){
+                
+                
+                buffer = list[i].getAttribute("id");
+                  
+                n = buffer.indexOf("bis");
+                if (n != -1) {
+                    buffer = buffer.slice(1,n);  
+                }
+                
+                m = buffer.indexOf("_");
+                if (m != -1) {
+                    buffer = buffer.slice(1,m);
+                }
+                
+                if (buffer>max) {
+                    max = buffer;
+                
+                
+                }
+                
+            }
+            
+            for(i=0; i<= max; i++){
+                for (j=0; j<list.length; j++){
+                    if (list[j].getAttribute("id").search("M" + i + "_") == 0 || list[j].getAttribute("id").search("M" + i + "bis") == 0) { 
+                        text += '<li>' + list[j].parentElement.innerHTML + '</li>';
+                    }
+    
+                }
+            }
+
+            
+            document.getElementById("lista_mapping").innerHTML = text;
+            
+            addListenerMapping();
+            
+            
+            
+            //If we are in a visualization different from the first one, we need to draw the connections
+            deleteLines();
+            
+            if (valore == '2') {
+                drawLinesVM();
+            } else if (valore == '3'){
+                drawLinesMP();
+            }
+            
+            closeMenu();
+
+        }
+        
+            
+        
+        function orderList(list){
+            
+            //This function gets the elements from a list and order them alphabetically
+            
+            list = Array.prototype.slice.call(list);
+            
+            list.sort(function(a,b){
+                return a.firstElementChild.getAttribute('id').localeCompare(b.firstElementChild.getAttribute('id'));
+            });
+            
+            return list;
+            
+        }
+        
+        function orderByViews() {
+            //This function orders the mppings by view, trying to have the minimum number of cross  connections
+            
+            var views = document.getElementsByClassName("view_link");
+            var mappings = document.getElementsByClassName("mapping_element");
+            var i;
+            var list = [];
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;         
+            
+            
+            for (i=0; i<views.length; i++) {
+                var related = findMappingsByView(views[i].getAttribute('id'));
+                
+                for (var j=related.length-1; j>=0; j--) {
+                    var parent = related[j].parentNode.parentNode;
+                    var detatchedItem = parent.removeChild(related[j].parentNode);
+                    
+                    }
+                for (j=0; j<related.length; j++) {
+                    list.push(related[j].parentNode);
+                }
+            }
+            
+            for (i=0; i<list.length; i++) {
+                parent.appendChild(list[i]);
+            }
+            
+            if (valore == '2') {
+                deleteLines();
+                drawLinesVM();
+            } 
+            else if (valore == '3'){
+                deleteLines();
+                drawLinesMP();
+            } 
+            else {
+                deleteLines();
+            }
+                
+            closeMenu();
+            
+        }
+        
+        function orderByEntities() {
+            //This function orders the mppings by entities, trying to have the minimum number of cross  connections
+            
+            var entities = document.getElementsByClassName("entity_link");
+            var i;
+            var list = [];
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;     
+         
+            
+            for (i=0; i<entities.length; i++) {
+                var related = findMappingsByEntity(entities[i].getAttribute('id'));
+                
+                for (var j=related.length-1; j>=0; j--) {
+                    var parent = related[j].parentNode.parentNode;
+                    var detatchedItem = parent.removeChild(related[j].parentNode);
+                    
+                    }
+                for (j=0; j<related.length; j++) {
+                    list.push(related[j].parentNode);
+                }
+            }
+            
+            for (i=0; i<list.length; i++) {
+                parent.appendChild(list[i]);
+            }
+            
+            if (valore == '2') {
+                deleteLines();
+                drawLinesVM();
+            } else if (valore == '3'){
+                deleteLines();
+                drawLinesMP();
+            } else {
+                deleteLines();
+            }
+            
+            
+                
+            closeMenu();
+            
+        }
+        
+        function orderType(){
+            //This function reorders the entities element by their type, each type is ordered alphabetically
+                
+            var attributes;
+            var roles;
+            var concepts;
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;
+            
+            attributes = orderList(document.getElementsByClassName("attribute_element"));
+            roles = orderList(document.getElementsByClassName("role_element"));
+            concepts = orderList(document.getElementsByClassName("concept_element"));
+            
+            var list = concepts.concat(roles);
+            list = list.concat(attributes); 
+           
+            for(var i = 0 ; i < list.length; i++) {
+                
+                var parent = list[i].parentNode;
+                var detatchedItem = parent.removeChild(list[i]);
+               
+            }
+            
+            for(var i = 0 ; i < list.length; i++) {
+                
+                parent.appendChild(list[i]);
+               
+            }
+            
+            
+            //If we are in a visualization different from the first one, we need to draw the connections
+            
+            if (valore == '3') {
+                deleteLines();
+                drawLinesMP();
+            }
+            
+            closeMenu();
+            
+        }
+        
+        function showInfo() {
+            //This function gets the variable "selected" which represent the element we want to see the details of, and calls other functions depending on the class name of it
+            
+            switch (selected_type) {
+                case 'view_link':
+                    showInfoViews();
+                    break;
+                case 'mapping_link':
+                    showInfoMappings();
+                    break;
+                default:
+                    showInfoEntities();
+                    break;
+            }
+            
+        }
+        
+        //The following functions "showInfo Views/Mappings/Entities" get the information of the clicked element from the xml file and write them in a "details" box that is shown to the client
+        
+        function showInfoViews() {  
+            
+            var xml = xmlhttp.responseXML;   
+            
+            var primitiveViews = xml.getElementsByTagName("primitiveView");
+            var details = document.getElementById("details");
+            var closeDetails = document.getElementById("closeDetails");
+            var query;
+            var j, i;
+           
+            
+             document.getElementById("info").innerHTML = "";
+
+                for(i=0; i<primitiveViews.length; i++){
+                    
+                    if(!selected.localeCompare(primitiveViews[i].firstElementChild.getAttribute('string'))){
+                        
+                            query = primitiveViews[i].firstElementChild.nextElementSibling.innerHTML;
+                            query = query.replace(/\n/g, '<br />');
+                            break;
+                    }
+                }
+
+                details.style.display = 'block';
+                closeDetails.style.display = 'block';
+                document.getElementById("detailsContent").innerHTML = '<div><b>Name: </b>' + selected + '</div> <hr /> <div><b>Description: </b> <hr /> <div><b>SQL Query: </b> ' + query + '</div>';
+            
+        }
+        
+        function showInfoMappings() {
+            
+            //This function consider the both cases, the element is a complex mapping or not
+            
+            var xml = xmlhttp.responseXML;
+        
+
+            var complexMapping = xml.getElementsByTagName("ontologyPredicateComplexMapping");
+            var ontologyMapping = xml.getElementsByTagName("ontologyPredicateMapping");
+            var views = document.getElementsByClassName("view_link");
+            var details = document.getElementById("details");
+            var closeDetails = document.getElementById("closeDetails");
+            var template = "";
+            var contentMapping = "";
+            var j, i;
+            var atom;
+            var range = "";
+            var head = "";
+            var check = 0;
+            var className = "";
+            var name;
+            var found;
+            
+            
+            range = '';
+            contentMapping = '';
+            atom = '';
+            head = '';
+
+
+            for(i=0; i<complexMapping.length; i++){
+
+                 if(!selected.localeCompare(complexMapping[i].getAttribute('id'))){ 
+                        atom = complexMapping[i].firstElementChild.nextElementSibling.getElementsByTagName("viewAtom");
+
+                        check = 1;
+
+                        template = complexMapping[i].firstElementChild.firstElementChild.textContent;
+
+                        className = complexMapping[i].firstElementChild.tagName;
+
+                        name = complexMapping[i].firstElementChild.getAttribute("string");
+
+                        if (className == 'role' || className == 'attribute') {
+
+                            range = complexMapping[i].firstElementChild.firstElementChild.nextElementSibling.textContent;
+
+
+                            break;
+
+                        } 
+
+
+                        break;
+                    }
+
+
+            }
+
+
+            for (i=0; i<ontologyMapping.length; i++) { 
+
+
+                     if(!selected.localeCompare(ontologyMapping[i].getAttribute('id'))) {
+
+                            template = ontologyMapping[i].firstElementChild.firstElementChild.textContent;
+
+                            //It will be possible clicking on the related views, to see more about them
+                            head = '<a href="#" id="'+ontologyMapping[i].firstElementChild.nextElementSibling.getAttribute("string")+'" class="head" onclick="showDetails()">'+ ontologyMapping[i].firstElementChild.nextElementSibling.getAttribute("string") + '</a>';
+
+                            className = ontologyMapping[i].firstElementChild.tagName;
+
+                            name = ontologyMapping[i].firstElementChild.getAttribute("string");
+
+
+                            if (className == 'role' || className == 'attribute'){
+
+                                range = ontologyMapping[i].firstElementChild.firstElementChild.nextElementSibling.textContent;
+
+                                break;
+
+
+                            }
+                             break;
+                    }
+            }
+
+            if (range != ''){
+
+                contentMapping = '<div><b>Mapping ID:</b> ' + selected + '</div><hr /><div><b>Entity: </b>' + name + '</div><hr /><div><b>Domain Template: </b>' + template +'</div>';
+                if (className == 'role') {
+                        contentMapping += '<hr /> <div><b>Range Template: </b>' + range +'</div> <hr /></div>';
+                }
+                else {
+                    contentMapping += '<hr /> <div><b>Range Argument: </b>' + range +'</div> <hr /></div>';
+                    }
+            }
+            else {
+                contentMapping = '<div><b>Mapping ID: </b>' + selected + '</div><div><b>Entity: </b>' + name + '</div><hr /><div><b>Template: </b>' + template +'</div> <hr /> </div>';
+
+            }
+
+
+
+            if (check == 1) {
+
+
+                contentMapping += '<div><b>Mapping Specification: </b>'; 
+                for (i=0; i<atom.length; i++) {
+
+                    found = false;
+
+                    for (j=0; j<views.length; j++) {
+
+                        //If the mapping element is related to views, it will be possible clicking on the related views, to see more about them  
+                        if (!atom[i].textContent.slice(0, atom[i].textContent.indexOf("(")).localeCompare(views[j].getAttribute("id").slice(0, views[j].getAttribute("id").indexOf("(")))) {
+
+                            contentMapping += '<a href="#" id="'+ atom[i].textContent.replace(/,/g , ", ") +'" class="head" onclick="showDetails()" >'+ atom[i].textContent.replace(/,/g , ", ") + '</a>';
+
+                            found = true;
+
+                            break;
+
+                        }
+
+
+                    }
+                    
+                    if (found == false) {
+                        contentMapping += atom[i].textContent.replace(/,/g , ", ") + '<br />';
+                    }
+                }
+                
+                contentMapping += '</div>';
+            }
+
+            if (head != '') {
+                contentMapping += '<div><b>Mapping Specification: </b>' + head + '</div>';
+
+            }
+
+
+
+            for (i=0; i<complexMapping.length;i++) {
+                if (!selected.localeCompare(complexMapping[i].getAttribute('id'))) { 
+                    details.style.display = 'block';
+                    closeDetails.style.display = 'block';
+                    document.getElementById("detailsContent").innerHTML = contentMapping;
+                }
+
+            }
+
+            for(i=0; i<ontologyMapping.length;i++) {
+                if (!selected.localeCompare(ontologyMapping[i].getAttribute('id')))  {
+                    details.style.display = 'block';
+                    closeDetails.style.display = 'block';
+                    document.getElementById("detailsContent").innerHTML = contentMapping;
+                }
+            }
+
+            document.getElementById("info").innerHTML = "";
+            
+            
+        }
+        
+        function showInfoEntities() {
+            //This function consider the both cases, the element is a complex mapping or not
+
+            
+            var xml = xmlhttp.responseXML;
+            
+            var complexMapping = xml.getElementsByTagName("ontologyPredicateComplexMapping");
+            var ontologyMapping = xml.getElementsByTagName("ontologyPredicateMapping");
+            var details = document.getElementById("details");
+            var closeDetails = document.getElementById("closeDetails");
+            var contentMapping = "";
+            var j, i;
+            var range = "";
+            var type ="";
+            var name ="";
+            var prefix ="";
+            
+           
+            document.getElementById("info").innerHTML = "";
+
+            range = '';
+
+
+
+            for(i=0; i<complexMapping.length; i++){
+
+                if(!selected.localeCompare(complexMapping[i].firstElementChild.getAttribute('string'))){ 
+                        type = complexMapping[i].firstElementChild.tagName;
+                        name = searchPrefix(complexMapping[i].firstElementChild.getAttribute("string"))[0];
+                        prefix = searchPrefix(complexMapping[i].firstElementChild.getAttribute("string"))[1];
+                        break;
+                }
+
+
+            }
+
+
+            for (i=0; i<ontologyMapping.length; i++) { 
+
+
+                    if(!selected.localeCompare(ontologyMapping[i].firstElementChild.getAttribute('string'))) {
+
+                         type = ontologyMapping[i].firstElementChild.tagName;
+                         searchPrefix(ontologyMapping[i].firstElementChild.getAttribute("string"))[0];
+                         prefix = searchPrefix(ontologyMapping[i].firstElementChild.getAttribute("string"))[1];
+                         break;
+                    }
+
+            }
+
+            switch(type) {
+
+                    //For each type the information to be shown is different, so here is considered each case
+
+                case 'concept':
+                    type = 'Class';
+                    break;
+                case 'attribute':
+                    type = 'Data Property';
+                    break;
+                case 'role':
+                    type = 'Object Property';
+                    break;
+                default:
+                    break;
+            }
+
+            contentMapping = '<div><b>Prefix: </b>' + prefix + '</div><hr /><div><b>Name: </b>' + selected + '</div><hr /><div><b>Predicate type: </b>' + type + '</div> <hr /></div>';
+
+
+            for (i=0; i<complexMapping.length;i++) {
+                if (!selected.localeCompare(complexMapping[i].firstElementChild.getAttribute('string'))) { 
+                    details.style.display = 'block';
+                    closeDetails.style.display = 'block';
+                    document.getElementById("detailsContent").innerHTML = contentMapping;
+                }
+
+            }
+
+            for(i=0; i<ontologyMapping.length;i++) {
+                if (!selected.localeCompare(ontologyMapping[i].firstElementChild.getAttribute('string')))  {
+                    details.style.display = 'block';
+                    closeDetails.style.display = 'block';
+                    document.getElementById("detailsContent").innerHTML = contentMapping;
+                }
+            }
+        }
+        
+        //The following three functions "addLIstener View/Mapping/Entities" add an eventListener for each element of the three lists. On click is possible to filter the element, on over is possible to see a button, that clicked will show the information of the element, and by leaving the mouse the button is not visible anymore
+        //For all, with the "onClick" modality, if the visualization is changed from the first one, we need to draw the connections
+        
+        function addListenerView(){
+            
+            var views = document.getElementsByClassName("view_link");
+            var popup = document.getElementById("popUp");
+            
+            var j;
+
+
+            for (j=0; j<views.length; j++){ 
+                views[j].addEventListener('mouseover', function(){
+
+                    if(event.target.tagName != 'IMG') {
+                        popup.style.display = 'block';
+
+                        var off = getOffset(event.target);
+                        popup.style.left = Math.min((event.clientX+5),(off.left+off.width))+'px';
+                        popup.style.top = (off.top-popup.clientHeight+5)+'px';
+                        selected = event.target.getAttribute("id");
+                        selected_type = event.target.getAttribute("class");
+
+                   }
+
+
+                    });
+
+
+                views[j].addEventListener('click', function() {
+
+                     if (event.target.tagName != 'IMG' && event.target.tagName != 'BUTTON') {
+
+                            var result = checkFilter();
+                            filterFunction(event.target, result[1], result[2]);
+
+                            deleteLines();
+
+                            if (document.getElementById("col3").style.display == 'none') {
+
+                                drawLinesVM();
+                            }
+                        }
+                });
+
+
+                views[j].addEventListener('mouseleave', function(){
+
+
+                        popup.style.display = 'none';
+
+
+
+                });
+
+
+            }
+
+            popup.addEventListener("mouseleave", function(){
+                 popup.style.display = 'none';
+
+                 var views = document.getElementsByClassName("view_link");
+                 for (i=0; i<views.length; i++){
+                     if (!views[i].getAttribute("id").localeCompare(selected)) {
+                         var view = views[i];
+                         break;
+                     }
+                 }
+                 view.classList.remove('selected');
+            });
+            
+            popup.addEventListener("mouseover", function(){
+                popup.style.display = 'block';
+
+                var views = document.getElementsByClassName("view_link");
+                    for (i=0; i<views.length; i++){
+                        if (!views[i].getAttribute("id").localeCompare(selected)) {
+                            var view = views[i];
+                            break;
+                        }
+                }
+                view.classList.add('selected');
+
+
+            });
+            
+        }
+        
+        
+        
+        function addListenerMapping(){
+            
+            var mappings = document.getElementsByClassName("mapping_link");
+
+            var j;
+            var popup = document.getElementById("popUp");
+            
+            
+            for (j=0; j<mappings.length; j++){ 
+
+                mappings[j].addEventListener('click', function(){
+
+                    if (event.target.tagName != 'IMG'  && event.target.tagName != 'BUTTON' ) {
+
+
+                        var result = checkFilter();
+
+                        if (result[0] != null) {
+                            filterFunction(result[0], event.target, result[2]);
+                        }
+                        else {
+                            filterFunction(event.target, result[0], result[2]);
+                        }
+
+                        deleteLines();
+
+                        if (document.getElementById("col1").style.display == 'none') {
+
+                            drawLinesMP();
+                        }
+                        else if (document.getElementById("col3").style.display == 'none') {
+
+                            drawLinesVM();
+                        }
+
+                    }
+
+                });
+
+
+
+                mappings[j].addEventListener('mouseover', function(){
+
+                    if(event.target.tagName != 'IMG') {
+
+                        popup.style.display = 'block';
+
+                        var off = getOffset(event.target);
+                        popup.style.left = Math.min((event.clientX+5),(off.left+off.width))+'px';
+                        popup.style.top = (off.top-popup.clientHeight+5)+'px';
+
+                        selected = event.target.getAttribute("id");
+                        selected_type = event.target.getAttribute("class");
+                    }
+
+
+
+                });
+
+
+                mappings[j].addEventListener('mouseleave', function(){
+
+                    popup.style.display = 'none';
+                });
+
+            }
+
+            popup.addEventListener("mouseleave", function(){
+                popup.style.display = 'none';
+
+                var mappings = document.getElementsByClassName("mapping_link");
+                for (i=0; i<mappings.length; i++){
+                    if (!mappings[i].getAttribute("id").localeCompare(selected)) {
+                        var mapping = mappings[i];
+                        break;
+                     }
+                 }
+                mapping.classList.remove('selected');
+            });
+                         
+            popup.addEventListener("mouseover", function(){
+                    popup.style.display = 'block';
+
+                    var mappings = document.getElementsByClassName("mapping_link");
+                    for (i=0; i<mappings.length; i++){
+                         if (!mappings[i].getAttribute("id").localeCompare(selected)) {
+                             var mapping = mappings[i];
+                             break;
+                         }
+                     }
+                     mapping.classList.add('selected');
+            });
+
+            
+        }
+        
+        
+        function addListenerEntities(){
+            
+            var entities = document.getElementsByClassName("entity_link");
+            var popup = document.getElementById("popUp");
+            var j;
+            
+            for (j=0; j<entities.length; j++){ 
+            
+                entities[j].addEventListener('click', function(){
+
+
+
+                    if (event.target.tagName != 'IMG' && event.target.tagName != 'BUTTON' ) {
+
+
+                        var result = checkFilter();
+                        if (result[0] != null) {
+                            filterFunction(result[0], result[1], event.target);
+                        }
+                        else if (result[1] != null) {
+                            filterFunction(event.target, result[1], result[0]);
+                        }
+                        else {
+                            filterFunction(event.target, result[0], result[1]);
+                        }
+                        if (document.getElementById("col1").style.display == 'none') {
+                            deleteLines();
+                            drawLinesMP();
+                        }
+                    }
+                });
+            
+            
+                entities[j].addEventListener('mouseover', function(){
+                    
+                    if(event.target.tagName != 'IMG') {
+                
+                        popup.style.display = 'block';
+                
+                        var off = getOffset(event.target);
+                        popup.style.left = Math.min((event.clientX+5),(off.left+off.width))+'px';
+                        popup.style.top = (off.top-popup.clientHeight+5)+'px';
+
+                        selected = event.target.getAttribute("id");
+                        selected_type = event.target.getAttribute("class");
+                    }
+
+
+                    
+                    
+                });
+
+           
+                entities[j].addEventListener('mouseleave', function(){
+                                    
+                    popup.style.display = 'none';
+                });
+
+
+            }
+
+            popup.addEventListener("mouseleave", function(){
+
+                popup.style.display = 'none';
+
+                var entities = document.getElementsByClassName("entity_link");
+                for (i=0; i<entities.length; i++){
+                     if (!entities[i].getAttribute("id").localeCompare(selected)) {
+                         var entity = entities[i];
+                         break;
+                     }
+                 }
+                entity.classList.remove('selected');
+            });
+
+            popup.addEventListener("mouseover", function(){
+                popup.style.display = 'block';
+
+                var entities = document.getElementsByClassName("entity_link");
+                for (i=0; i<entities.length; i++){
+                     if (!entities[i].getAttribute("id").localeCompare(selected)) {
+                         var entity = entities[i];
+                         break;
+                     }
+                 }
+                entity.classList.add('selected');
+            });
+        }
+               
+   
+        function showDetails() {
+            //This functions has been called adding the event listener on mapping and when is clicked the view related to that mapping, we can see more about it
+                
+            var xml = xmlhttp.responseXML;
+
+            var head = document.getElementsByClassName("head");   
+
+            var primitiveViews = xml.getElementsByTagName("primitiveView");
+            var details = document.getElementById("details");
+            var closeDetails = document.getElementById("closeDetails");
+            var query;
+            var j, i;
+            
+                
+
+            for (j=0; j<head.length; j++) {
+                for(i=0; i<primitiveViews.length; i++){
+
+                    if(!head[j].getAttribute('id').slice(0, head[j].getAttribute("id").indexOf("(")).localeCompare(primitiveViews[i].firstElementChild.getAttribute('string').slice(0, primitiveViews[i].firstElementChild.getAttribute("string").indexOf("(")))){
+                            query = primitiveViews[i].firstElementChild.nextElementSibling.innerHTML;
+                            query = query.replace(/\n/g, '<br />');
+                            break;
+                    }
+                }
+            }
+
+            details.style.display = 'block';
+            closeDetails.style.display = 'block';
+
+            document.getElementById("info").innerHTML = '<div><b>SQL Query: </b>' + query + '</div>';
+
+            
+        }
+        
+
+        
+        function connect(div1, div2, color, thickness) {
+            
+            //This function connects two elements creating a line. It gets the start position and the end position and draw the line using canvas library
+            
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;
+
+            var off1 = getOffset(div1);
+            var off2 = getOffset(div2);
+            
+            var x1 = off1.left + off1.width +2;
+            var y1 = off1.top + off1.height/2;
+            
+            var x2 = off2.left-2;
+            var y2 = off2.top + off2.height/2;
+
+            x1 = Math.floor(x1);
+            x2 = Math.floor(x2);
+            y1 = Math.floor(y1);
+            y2 = Math.floor(y2);
+
+            context.beginPath();
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.lineWidth = thickness;
+            context.strokeStyle = color;
+            context.stroke();
+            
+            document.getElementById("selection").value = valore;
+        
+    }
+
+    function getOffset( el ) {
+        //This function gets the offset position of an element
+        var rect = el.getBoundingClientRect();
+        return {
+            left: rect.left + window.pageXOffset,
+            top: rect.top + window.pageYOffset,
+            width: rect.width || el.offsetWidth,
+            height: rect.height || el.offsetHeight
+        };
+    }
+
+    //The following functions get all the related elements of a given one, searching on the xml file and return an array containing those elements
+        
+    function findMappingsByView(id){
+        
+        var i,j;
+        var ontologyMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateMapping");
+        var complexMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateComplexMapping");
+        var mappings = document.getElementsByClassName("mapping_link");
+        var list = [];
+        var related = [];
+        var atom;
+        
+        var buffer1, buffer2;
+        
+        
+        for (i=0; i<ontologyMapping.length; i++) {
+            
+            if(!id.slice(0, id.indexOf("(")).localeCompare(ontologyMapping[i].firstElementChild.nextElementSibling.getAttribute("string").slice(0, ontologyMapping[i].firstElementChild.nextElementSibling.getAttribute("string").indexOf("(")))){
+                
+                list.push(ontologyMapping[i]);
+            }
+            
+        }
+            
+        
+        for (i=0; i<complexMapping.length; i++) {
+           
+            atom = complexMapping[i].firstElementChild.nextElementSibling.getElementsByTagName("viewAtom");
+            
+            for(j=0; j<atom.length; j++){
+                
+                buffer1 = id.slice(0, id.indexOf( '('));
+                buffer2 = atom[j].textContent.slice(0, atom[j].textContent.indexOf("("));
+                
+                if(!buffer1.toUpperCase().localeCompare(buffer2.toUpperCase())){
+                    list.push(complexMapping[i]);
+                }
+            }
+        }
+        
+        
+        for(i=0; i<mappings.length;i++){
+            
+            for(j=0; j<list.length; j++){
+               
+                if(!mappings[i].getAttribute('id').localeCompare(list[j].getAttribute('id'))){
+                    related.push(mappings[i]);
+                   
+                }
+            }
+        }
+
+        return related;
+        
+    }
+        
+        function findMappingsByEntity(id){
+
+            var i,j;
+            var ontologyMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateMapping");
+            var complexMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateComplexMapping");
+            var mappings = document.getElementsByClassName("mapping_link");
+            var list = [];
+            var related = [];
+
+
+
+
+
+            for (i=0; i<ontologyMapping.length; i++) {
+
+                if(!id.localeCompare(ontologyMapping[i].firstElementChild.getAttribute("string"))){
+
+                    list.push(ontologyMapping[i]);
+                }
+
+            }
+
+
+            for (i=0; i<complexMapping.length; i++) {
+              if(!id.localeCompare(complexMapping[i].firstElementChild.getAttribute("string"))){
+
+                    list.push(complexMapping[i]);
+                }
+            }
+
+
+            for(i=0; i<mappings.length;i++){
+                
+                for(j=0; j<list.length; j++){
+
+                    if(!mappings[i].getAttribute('id').localeCompare(list[j].getAttribute('id'))){
+                        related.push(mappings[i]);
+
+                    }
+                }
+            }
+
+
+            return related;
+        
+    }
+        
+    function findEntitiesByMapping(id) {
+        
+        var i,j;
+        var ontologyMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateMapping");
+        var complexMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateComplexMapping");
+        var entities = document.getElementsByClassName("entity_link");
+        var mapping;
+        var related;
+        
+        for (i=0; i<ontologyMapping.length; i++) {
+            
+            if(!id.localeCompare(ontologyMapping[i].getAttribute("id"))){
+
+                mapping = ontologyMapping[i];
+            }
+            
+        }
+            
+        
+        for (i=0; i<complexMapping.length; i++) {
+          if(!id.localeCompare(complexMapping[i].getAttribute("id"))){
+                
+                mapping = complexMapping[i];
+            }
+        }
+        
+        
+        for(i=0; i<entities.length;i++){
+                if(!entities[i].getAttribute('id').localeCompare(mapping.firstElementChild.getAttribute('string'))){
+                    related = entities[i];
+                       
+                }
+    
+        }
+
+        return related;
+        
+    }
+        
+        function findViewsByMapping(id) {
+        
+        var i,j;
+        var ontologyMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateMapping");
+        var complexMapping = xmlhttp.responseXML.getElementsByTagName("ontologyPredicateComplexMapping");
+        var views = document.getElementsByClassName("view_link");
+        var list = [];
+        var related = [];
+            var atom = '';
+            
+        
+        for (i=0; i<ontologyMapping.length; i++) {
+            
+            if(!id.localeCompare(ontologyMapping[i].getAttribute("id"))){
+
+                list.push(ontologyMapping[i]);
+            }
+            
+        }
+            
+            
+        
+        for (i=0; i<complexMapping.length; i++) {
+            
+          if(!id.localeCompare(complexMapping[i].getAttribute("id"))){
+                atom = complexMapping[i].firstElementChild.nextElementSibling.getElementsByTagName("viewAtom");
+            }
+        }
+            
+        if (atom.length != 0) {
+            for (i=0; i<views.length; i++) {
+                for (j=0; j<atom.length; j++) {
+                    buffer1 = views[i].getAttribute("id").slice(0, views[i].getAttribute('id').indexOf("("));
+                    buffer2 = atom[j].textContent.slice(0, atom[j].textContent.indexOf("("));
+
+
+                     if (!buffer1.toUpperCase().localeCompare(buffer2.toUpperCase())) {
+                         related.push(views[i]);
+                     }
+                }
+             }
+        }
+        else {
+                for (i=0; i<views.length; i++) {
+                    for (j=0; j<list.length; j++) {
+                    
+                        if (!views[i].getAttribute("id").localeCompare(list[j].firstElementChild.nextElementSibling.getAttribute("string"))) {
+                            related.push(views[i]);
+                        }
+                    }
+                }
+        }
+        return related;
+        
+    }
+
+    
+    function drawLinesVM() {
+        
+        //This function finds all the mapping elements related to each element from the views list and then for each element shown it calls the function "connect" to draw the connections. It also recalculate the dimensions of the canvas box
+        
+        var views = document.getElementsByClassName("view_link");
+        
+        var el1, el2;
+        var i, j;
+        var div1, div2;
+        
+        var related;
+        
+        canvas.width = document.body.clientWidth;
+        canvas.height = getDocumentHeight();
+        for (i=0; i<views.length; i++) {
+            related = findMappingsByView(views[i].getAttribute('id'));
+            
+            for(j=0; j<related.length; j++){
+                if (views[i].style.display != 'none'){
+                    if(related[j].style.display != 'none') {
+                        el2 = related[j].getAttribute("id");
+                        
+                        el1 = views[i].firstElementChild.nextElementSibling.getAttribute("id");
+                        
+                        div1 = document.getElementById(el1);
+                        div2 = document.getElementById(el2);
+                        connect(div1, div2, "#4CAF50", 2);
+                     }
+                 }
+             }
+        }
+        
+    }
+        
+    function drawLinesMP() {
+            
+        //This function finds all the mapping elements related to each element from the entities list and then for each element shown it calls the function "connect" to draw the connections. It also recalculate the dimensions of the canvas box
+        
+        var entities = document.getElementsByClassName("entity_link");
+        
+        var el1, el2;
+        
+        var i, j;
+       
+        var div1, div2;
+        
+            
+        var related;
+        
+        canvas.width = document.body.clientWidth;
+        canvas.height = getDocumentHeight();
+        for (i=0; i<entities.length; i++) {
+            related = findMappingsByEntity(entities[i].getAttribute('id'));
+            
+            for(j=0; j<related.length; j++) {
+                
+                if (related[j].style.display != 'none' && entities[i].style.display != 'none'){
+            
+                        el1 = related[j].firstElementChild.nextElementSibling.getAttribute("id");
+                        
+                        el2 = entities[i].getAttribute("id");
+                        
+                        div1 = document.getElementById(el1);
+                        div2 = document.getElementById(el2);
+                        connect(div1, div2, "#4CAF50", 2);
+            
+                }
+            }
+        }
+           
+   
+    }
+       
+            
+    function deleteLines() {
+            
+        //This function remove all the connections created
+            
+         context.clearRect(0,0,canvas.width,canvas.height);
+            
+    }
+        
+    // The following three functions loop through all list items, and hide those who don't match the search query. They also call some functions to check if there are or not filters, in order to display just the correct ones
+    function searchView() {
+            
+          var input, filter, ul, li, a, i, txtValue;
+          input = document.getElementById('searchView');
+          filter = input.value.toUpperCase();
+          ul = document.getElementById("lista_viste");
+          li = ul.getElementsByTagName('li');
+          var e = document.getElementById("selection");
+          var valore = e.options[e.selectedIndex].value;
+
+        
+            var result = checkFilter();
+            if(result[0] != null){
+                filterFunction(result[0],result[1],result[2]);
+            }
+            else if (result[1] != null){
+                filterFunction(result[1],result[0],result[2]);
+            }
+            else if (result[2] != null){
+                filterFunction(result[2],result[1],result[0]);
+            }
+            else {
+                for (i = 0; i < li.length; i++) {
+                    li[i].firstElementChild.style.display = "block";
+                }
+            }
+        
+          for (i = 0; i < li.length; i++) {
+              
+              if(li[i].firstElementChild.style.display != 'none'){
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].firstElementChild.style.display = "block";
+                }
+                else {
+                    li[i].firstElementChild.style.display = "none";
+                } 
+                
+                }
+
+          }
+
+          if (valore == '2') {
+                if (filter.length > 0) {
+                    ul.classList.remove('spread');
+                }
+                else {
+                    if(result[0] == null && result[1] == null && result[2] == null ){
+                    ul.classList.add('spread');
+                    }
+                }
+                deleteLines();
+                drawLinesVM();
+            }
+    }
+        
+    function searchMapping() {
+             
+          var input, filter, ul, li, a, i, txtValue;
+          input = document.getElementById('searchMapping');
+          filter = input.value.toUpperCase();
+          ul = document.getElementById("lista_mapping");
+          li = ul.getElementsByTagName('li');
+          var e = document.getElementById("selection");
+          var valore = e.options[e.selectedIndex].value;   
+
+            var result = checkFilter();
+            if(result[0] != null){
+                filterFunction(result[0],result[1],result[2]);
+            }
+            else if (result[1] != null){
+                filterFunction(result[1],result[0],result[2]);
+            }
+            else if (result[2] != null){
+                filterFunction(result[2],result[1],result[0]);
+            }
+            else {
+                for (i = 0; i < li.length; i++) {
+                    li[i].firstElementChild.style.display = "block";
+                }
+            }
+        
+        
+          for (i = 0; i < li.length; i++) {
+              if(li[i].firstElementChild.style.display != 'none'){
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].firstElementChild.style.display = "block";
+
+            
+                } 
+                else {
+                    li[i].firstElementChild.style.display = "none";
+                }
+              }
+            }
+        
+            if (valore == '2') {
+                    if (filter.length > 0) {
+                        ul.classList.remove('spread');
+                    }
+                    else {
+                        ul.classList.add("spread");
+                    }
+                    deleteLines();
+                    drawLinesVM();
+            }
+            else if (valore == '3') {
+                if (filter.length > 0) {
+                    ul.classList.remove('spread');
+                }
+                else {
+                    ul.classList.add("spread");
+                }
+                deleteLines();
+                drawLinesMP();
+            }
+    }
+        
+    function searchEntity() {
+             
+            var input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById('searchEntity');
+            filter = input.value.toUpperCase();
+            ul = document.getElementById("lista_entita");
+            li = ul.getElementsByTagName('li');
+            var e = document.getElementById("selection");
+            var valore = e.options[e.selectedIndex].value;  
+            
+            var result = checkFilter();
+            if(result[0] != null){
+                filterFunction(result[0],result[1],result[2]);
+            }
+            else if (result[1] != null){
+                filterFunction(result[1],result[0],result[2]);
+            }
+            else if (result[2] != null){
+                filterFunction(result[2],result[1],result[0]);
+            }
+            else {
+                for (i = 0; i < li.length; i++) {
+                    li[i].firstElementChild.style.display = "block";
+                }
+            }
+              
+              for (i = 0; i < li.length; i++) {
+                  if(li[i].firstElementChild.style.display != 'none'){
+                    a = li[i].getElementsByTagName("a")[0];
+                    txtValue = a.textContent || a.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        li[i].firstElementChild.style.display = "block";
+                    
+                   
+                    }
+                    else {
+                        li[i].firstElementChild.style.display = "none";
+                    }
+                  }
+              }
+            
+            
+             if (valore == '3') {
+                        if (filter.length > 0) {
+                            ul.classList.remove('spread');
+                        }
+                        else {
+                            ul.classList.add("spread");
+                        }
+                        deleteLines();
+                        drawLinesMP();
+             }
+
+    }
+        
+    function searchPrefix(string) {
+            
+            //This function searches the correct prefix of a string name and return the string name with the prefixName and the prefix itself
+            
+            var i;
+            var nomeCorto;
+            var prefixes = xmlhttp.responseXML.getElementsByTagName("prefix");
+            var pref;
+            
+            for (i=0; i<prefixes.length; i++) {
+                
+                if (string.search(prefixes[i].getAttribute("namespace")) != -1) {
+                    pref = prefixes[i].getAttribute("name");
+                    nomeCorto = pref + string.slice(prefixes[i].getAttribute("namespace").length, string.length);
+                    break;
+                }
+            }
+
+            return [nomeCorto, prefixes[i].getAttribute("namespace")];
+            
+        }
+        
+        //The following three functions clear the search query and show the elements of the list that are related to what is on screen
+        
+        function clearInputViews() {
+              
+                var input, filter, ul, li;
+                input = document.getElementById('searchView');
+                filter = input.value = '';
+                ul = document.getElementById("lista_viste");
+                li = ul.getElementsByTagName('li');
+                var e = document.getElementById("selection");
+                var valore = e.options[e.selectedIndex].value;
+
+                var result = checkFilter();
+                deleteLines();
+                if(result[0] == null && result[1] == null && result[2] == null ){
+
+                  for (i = 0; i < li.length; i++) {
+                      li[i].firstElementChild.style.display = "block"; 
+
+                  }
+
+                    if (valore == '2'){
+                    ul.classList.add("spread");
+                    drawLinesVM();
+                }
+                }  
+                else{
+
+                    var result = checkFilter();
+                    if(result[0] != null){
+                        filterFunction(result[0],result[1],result[2]);
+                    }
+                    else if (result[1] != null){
+                        filterFunction(result[1],result[0],result[2]);
+                    }
+                    else if (result[2] != null){
+                        filterFunction(result[2],result[1],result[0]);
+                    }
+
+                    if (valore == '2'){
+                    ul.classList.remove("spread");
+                    drawLinesVM();
+                }
+
+                }
+            
+            
+            
+        }
+        
+        function clearInputMappings() {
+                var input, filter, ul, li;
+                input = document.getElementById('searchMapping');
+                filter = input.value = '';
+                ul = document.getElementById("lista_mapping");
+                li = ul.getElementsByTagName('li');
+                var e = document.getElementById("selection");
+                var valore = e.options[e.selectedIndex].value;
+            
+                var result = checkFilter();
+
+                if(result[0] == null && result[1] == null && result[2] == null ){
+
+                  for (i = 0; i < li.length; i++) {
+                      li[i].firstElementChild.style.display = "block"; 
+
+                  }
+
+                }  
+                else{
+
+                    var result = checkFilter();
+                    if(result[0] != null){
+                        filterFunction(result[0],result[1],result[2]);
+                    }
+                    else if (result[1] != null){
+                        filterFunction(result[1],result[0],result[2]);
+                    }
+                    else if (result[2] != null){
+                        filterFunction(result[2],result[1],result[0]);
+                    }
+
+                }
+
+                 deleteLines();
+                    if(valore == '2'){
+                        ul.classList.add("spread");
+                        drawLinesVM();
+                    }
+                    else if (valore == '3'){
+                        ul.classList.add("spread");
+                        drawLinesMP();
+                    }  
+        }
+        
+        function clearInputEntities() {
+              var input, filter, ul, li;
+              input = document.getElementById('searchEntity');
+              filter = input.value = '';
+              ul = document.getElementById("lista_entita");
+              li = ul.getElementsByTagName('li');
+              var e = document.getElementById("selection");
+              var valore = e.options[e.selectedIndex].value;
+        
+             var result = checkFilter();
+            
+            if(result[0] == null && result[1] == null && result[2] == null ){
+
+              for (i = 0; i < li.length; i++) {
+                  li[i].firstElementChild.style.display = "block"; 
+    
+              }
+                 
+
+            }  
+            else{
+                
+                var result = checkFilter();
+                if(result[0] != null){
+                    filterFunction(result[0],result[1],result[2]);
+                }
+                else if (result[1] != null){
+                    filterFunction(result[1],result[0],result[2]);
+                }
+                else if (result[2] != null){
+                    filterFunction(result[2],result[1],result[0]);
+                }
+                
+            }
+            
+             deleteLines();
+                
+                 if (valore == '3'){
+                    drawLinesMP();
+                }
+    }
+        
+        
+    function showLinks() {
+
+        //This function shows and hides the connections between elements
+
+        clicked ++;
+
+        if (clicked > 1) {
+
+                document.getElementById("showLinks").textContent = 'Remove Links';
+                canvas.style.display = 'block';
+                 clicked = 0;
+
+        }
+        else {
+
+                document.getElementById("showLinks").textContent = 'Show Links';
+                canvas.style.display = 'none';
+
+        }
+
+    }
+
+        
+        
+        function closeFilter() {
+            
+            //This function closes the filter that has been clicked and calls other functions to apply the remains filter
+            //It values all the cases, if there is just one filter or not
+            
+            var list = document.getElementById("filterList");
+            var views = document.getElementsByClassName("view_link");
+            var mappings = document.getElementsByClassName("mapping_link");
+            var entities = document.getElementsByClassName("entity_link");
+            var i, vi, map, ent;
+            
+            if (event.target.parentElement.textContent.search('Views')>=0) {
+                event.target.parentElement.innerHTML = '';
+                if (document.getElementById("filterMapping").textContent == '' && document.getElementById("filterEntity").textContent == '') {
+                    
+                    clearInputViews();
+                    clearInputEntities();
+                    clearInputMappings();
+                    if (document.getElementById("col3").style.display == 'none') {
+                        document.getElementById("lista_mapping").classList.add("spread");
+                        document.getElementById("lista_viste").classList.add("spread");
+                    }
+                    else if (document.getElementById("col1").style.display == 'none'){
+                        document.getElementById("lista_mapping").classList.add("spread");
+                        document.getElementById("lista_entita").classList.add("spread");
+                    }
+                    
+                }
+                
+                else if (document.getElementById("filterMapping").textContent != '') {
+                    for (i=0; i<mappings.length; i++) {
+                        if (mappings[i].style.display == 'block') {
+                            map = mappings[i];
+                            break;
+                        }
+                    }
+                    if (document.getElementById("filterEntity").textContent != '') {
+                        for (i=0; i<entities.length; i++) {
+                            if (entities[i].style.display == 'block') {
+                                ent = entities[i];
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        ent = null;
+                    }
+                     filterFunction(map, null, ent);
+                }
+                else {
+                    for (i=0; i<entities.length; i++) {
+                            if (entities[i].style.display == 'block') {
+                                ent = entities[i];
+                                break;
+                            }
+                        
+                    }
+                    filterFunction(ent, null, null);
+                    
+                }
+                   
+                
+            }
+
+            else if (event.target.parentElement.textContent.search ('Mappings')>=0){
+                    event.target.parentElement.innerHTML = '';
+                    if (document.getElementById("filterView").textContent == '' && document.getElementById("filterEntity").textContent == '') {
+                        clearInputViews();
+                        clearInputEntities();
+                        clearInputMappings();
+                        if (document.getElementById("col3").style.display == 'none') {
+                            document.getElementById("lista_mapping").classList.add("spread");
+                            document.getElementById("lista_viste").classList.add("spread");
+                        }
+                        else if (document.getElementById("col1").style.display == 'none'){
+                            document.getElementById("lista_mapping").classList.add("spread");
+                            document.getElementById("lista_entita").classList.add("spread");
+                        }
+                    }
+
+                    else if (document.getElementById("filterView").textContent != '') {
+                        for (i=0; i<views.length; i++) {
+                            if (views[i].style.display == 'block') {
+                                vi = views[i];
+                                break;
+                            }
+                        }
+                        if (document.getElementById("filterEntity").textContent != '') {
+                            for (i=0; i<entities.length; i++) {
+                                if (entities[i].style.display == 'block') {
+                                    ent = entities[i];
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            ent = null;
+                        }
+                         filterFunction(vi, null, ent);
+                    }
+                    else {
+                        for (i=0; i<entities.length; i++) {
+                                if (entities[i].style.display == 'block') {
+                                    ent = entities[i];
+                                    break;
+                                }
+
+                        }
+                        filterFunction(ent, null, null);
+
+                    }
+                }
+                else if(event.target.parentElement.textContent.search ('Entities')>=0){
+                    event.target.parentElement.innerHTML = '';
+                    if (document.getElementById("filterView").textContent == '' && document.getElementById("filterMapping").textContent == '') {
+                        clearInputViews();
+                        clearInputEntities();
+                        clearInputMappings();
+                        if (document.getElementById("col3").style.display == 'none') {
+                            document.getElementById("lista_mapping").classList.add("spread");
+                            document.getElementById("lista_viste").classList.add("spread");
+                        }
+                        else if (document.getElementById("col1").style.display == 'none'){
+                            document.getElementById("lista_mapping").classList.add("spread");
+                            document.getElementById("lista_entita").classList.add("spread");
+                        }
+                    }
+
+                    else if (document.getElementById("filterView").textContent != '') {
+                        for (i=0; i<views.length; i++) {
+                            if (views[i].style.display == 'block') {
+                                vi = views[i];
+                                break;
+                            }
+                        }
+                        if (document.getElementById("filterMapping").textContent != '') {
+                            for (i=0; i<mappings.length; i++) {
+                                if (mappings[i].style.display == 'block') {
+                                    map = mappings[i];
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            map = null;
+                        }
+                         filterFunction(vi, map, null);
+                    }
+                    else {
+                        for (i=0; i<mappings.length; i++) {
+                                if (mappings[i].style.display == 'block') {
+                                    map = mappings[i];
+                                    break;
+                                }
+
+                        }
+                        filterFunction(map, null, null);
+
+                    }
+                }
+
+
+                deleteLines();
+
+                if (document.getElementById("col1").style.display == 'none') {
+                    drawLinesMP();
+                }
+                else if (document.getElementById("col3").style.display == 'none') {
+                    drawLinesVM();
+                }
+        }
+        
+        function checkFilter() {
+            //This function checks which filters are activated and return the elements displayed or null
+            
+            var views = document.getElementsByClassName("view_link");
+            var mappings = document.getElementsByClassName("mapping_link");
+            var entities = document.getElementsByClassName("entity_link");
+            var i, vi, map, ent;
+            
+            if (document.getElementById("filterView").textContent != '') {
+                for (i=0; i<views.length; i++) {
+                    
+                    if (!document.getElementById("filterView").textContent.slice(document.getElementById("filterView").textContent.indexOf('=')+2,document.getElementById("filterView").textContent.length-2).localeCompare(views[i].getAttribute('id').slice(0,views[i].getAttribute('id').indexOf('(')))) {
+                        
+                        vi = views[i];
+                        break;
+                    }
+                }
+            }
+            else { 
+                vi = null;
+            }
+           
+            
+            if (document.getElementById("filterMapping").textContent != '') {
+                for (i=0; i<mappings.length; i++) {
+                    
+                    if (!document.getElementById("filterMapping").textContent.slice(document.getElementById("filterMapping").textContent.indexOf('=')+2,document.getElementById("filterMapping").textContent.length-3).localeCompare(mappings[i].getAttribute('id'))) {
+                        map = mappings[i];
+                        break;
+                    }
+                }
+            }
+            else {
+                map = null;
+            }
+            
+                
+            if (document.getElementById("filterEntity").textContent != '') {
+                for (i=0; i<entities.length; i++) {
+               
+                if (!document.getElementById("filterEntity").textContent.slice(document.getElementById("filterEntity").textContent.indexOf(':'),document.getElementById("filterEntity").textContent.length-2).localeCompare(searchPrefix(entities[i].getAttribute('id'))[0])) {
+                    
+                    
+                        ent = entities[i];
+                        break;
+                    }
+                }
+            }
+            else {
+                ent = null;
+            }
+            return [vi, map, ent];
+        }
+        
+        function filterFunction(vi, map, ent) {
+            
+            //This function filters the elements passed. In this function all cases are valuated, because each time the element is clicked, it searches the elements related and filters the clicked one, but if a filter is removed, it "calculates" the new elements related to be shown, seeing if there are other filters at work
+            
+            var i,j;
+            var views = document.getElementsByClassName("view_link");
+            var mappings = document.getElementsByClassName("mapping_link");
+            var entities = document.getElementsByClassName("entity_link");
+            var maps, view, entity;
+            
+            document.getElementById("lista_mapping").classList.remove("spread");
+            document.getElementById("lista_viste").classList.remove("spread");
+            document.getElementById("lista_entita").classList.remove("spread");
+
+            
+            
+            
+            if (vi.className == 'mapping_link') {
+                map = vi;
+                vi = null;
+            }
+            else if(vi.classList.contains('entity_link')){
+                ent = vi;
+                vi = null;
+            }
+            
+            
+            
+            for (i=0; i<views.length; i++ ) {
+                views[i].style.display = 'none';
+            }
+            for (i=0; i<mappings.length; i++ ) {
+                mappings[i].style.display = 'none';
+            }
+            for (i=0; i<entities.length; i++ ) {
+                entities[i].style.display = 'none';
+            }
+            
+            if (vi == null && map == null) {
+
+                ent.style.display = 'block';
+                maps = findMappingsByEntity(ent.getAttribute('id'));
+                     for (i=0; i<maps.length; i++) {
+                        maps[i].style.display = 'block';
+                         view = findViewsByMapping(maps[i].getAttribute('id'));
+                        
+                    
+                        if (view.length == 'undefined') {
+                            view.style.display = 'block';
+                        }
+                        else {
+                            for (j=0; j<view.length; j++) {
+                                view[j].style.display = 'block';
+                                
+                            }
+                        }
+                         
+                    }
+                    document.getElementById("filterEntity").innerHTML = 'Entities = ' + ent.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+                
+            }
+            
+            else if (vi == null && ent == null) {
+                    map.style.display = 'block';
+                    entity = findEntitiesByMapping(map.getAttribute('id'));
+                    
+                    entity.style.display = 'block';
+                    view = findViewsByMapping(map.getAttribute('id'));
+                    
+                    
+                    if (view.length == 'undefined') {
+                        view.style.display = 'block';
+                    }
+                    else {
+                        for (i=0; i<view.length; i++) {
+                            view[i].style.display = 'block';
+                        }
+                    }
+                     document.getElementById("filterMapping").innerHTML = 'Mappings = ' + map.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+                
+            }
+            
+            else if (map == null && ent == null) {
+                
+                    vi.style.display = 'block';
+                  
+                   maps = findMappingsByView(vi.getAttribute("id"));
+                    
+                    for (i=0; i<maps.length; i++) {
+                        maps[i].style.display = 'block';
+                        entity = findEntitiesByMapping(maps[i].getAttribute("id"));
+                        entity.style.display = 'block';
+                    }
+                   
+                    document.getElementById("filterView").innerHTML = 'Views = ' + vi.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+            }
+            else if (vi == null) {
+               
+                map.style.display = 'block';
+                ent.style.display = 'block';
+                view = findViewsByMapping(map.getAttribute('id'));
+                    
+                    
+                    if (view.length == 'undefined') {
+                        view.style.display = 'block';
+                    }
+                    else {
+                        for (i=0; i<view.length; i++) {
+                            view[i].style.display = 'block';
+                        }
+                    }
+                     document.getElementById("filterMapping").innerHTML = 'Mappings = ' + map.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+               document.getElementById("filterEntity").innerHTML = 'Entities = ' + ent.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+            }
+            else if (map == null) {
+                
+                vi.style.display = 'block';
+                ent.style.display = 'block';
+                
+                var mapByVi = findMappingsByView(vi.getAttribute("id"));
+                var mapsByEnt = findMappingsByEntity(ent.getAttribute("id"));
+
+                
+                    for (i=0; i<mapByVi.length; i++) {
+                        for (j=0; j<mapsByEnt.length; j++) {
+                            if (!mapByVi[i].getAttribute("id").localeCompare(mapsByEnt[j].getAttribute("id"))) {
+                                mapByVi[i].style.display = 'block';
+                                
+                            }
+                        }
+                    }
+                    
+                document.getElementById("filterView").innerHTML = 'Views = ' + vi.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+                document.getElementById("filterEntity").innerHTML = 'Entities = ' + ent.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+            }
+            else if (ent == null) {
+                
+                map.style.display = 'block';
+                vi.style.display = 'block';
+                
+                entity = findEntitiesByMapping(map.getAttribute("id"));
+                        entity.style.display = 'block';
+                
+                document.getElementById("filterMapping").innerHTML = 'Mappings = ' + map.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+                document.getElementById("filterView").innerHTML = 'Views = ' + vi.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+            }
+            else {
+                vi.style.display = 'block';
+                ent.style.display = 'block';
+                map.style.display = 'block';
+                document.getElementById("filterMapping").innerHTML = 'Mappings = ' + map.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+                document.getElementById("filterView").innerHTML = 'Views = ' + vi.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+                document.getElementById("filterEntity").innerHTML = 'Entities = ' + ent.textContent + ' <span id="closeFilter" class="close" onclick="closeFilter()">&times;</span>';
+            }
+        
+           
+        }
+        
+        function getDocumentHeight() {
+            
+            //This functions get the height of the document body to give the right dimension to the canvas box
+            var body = document.body;
+            var html = document.documentElement;
+            
+            var height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+            return height;
+        }
+        
+        </script>
+
+  
+</html>
